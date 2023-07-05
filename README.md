@@ -8,7 +8,7 @@ You can download VIC from the following:
 - [Pling](https://www.pling.com/p/2059807)
 - [Buy me a coffee](https://buymeacoffee.com/iamlooper/posts) (Early access)
 
-# Description 📝
+## Description 📝
 Introducing VIC (Versatile Intelligent Chatbot), a personalized AI assistant designed to cater to your every need. With dynamic personas and a changeable conversation style, this companion adapts to your preferences, ensuring a truly customized experience.
 
 Stay connected to the world with real-time information at your fingertips. With internet access, our companion provides up-to-date news, weather updates, and much more, keeping you informed and empowered.
