@@ -1,7 +1,7 @@
 ![VIC](https://github.com/iamlooper/VIC/raw/main/vic.png)
 
 # VIC (Versatile Intelligent Chatbot) 🧠
-Your personalized conversational companion with dynamic personas, changeable conversation style and real-time information.
+Your personalized conversational companion with dynamic personas, changeable conversational style and real-time information.
 
 ## Download 📲
 You can download VIC from the following:
@@ -23,7 +23,7 @@ Discover a new level of interaction and connectivity with our personalized conve
 [<img src="https://github.com/iamlooper/VIC/raw/main/screenshots/ss_03.png" width=140>](https://github.com/iamlooper/VIC/raw/main/screenshots/ss_03.png)
 [<img src="https://github.com/iamlooper/VIC/raw/main/screenshots/ss_04.png" width=140>](https://github.com/iamlooper/VIC/raw/main/screenshots/ss_04.png)
 
-## Support 💙
+## Support Me 💙
 If you liked any one of my projects then consider supporting me via following:
 - [Buy me a coffee](https://buymeacoffee.com/iamlooper/membership)
 - [Join telegram channel](https://loopprojects.t.me)
