@@ -50,4 +50,4 @@ Message me if I missed anyone. 😉
 - [Better Link Movement Method](https://github.com/saket/Better-Link-Movement-Method) (Apache 2.0)
 - [OkHttp](https://square.github.io/okhttp) (Apache 2.0)
 - [RikkaX](https://github.com/RikkaApps/RikkaX) (MIT)
-- [LoadingDots for Android)(https://github.com/EyalBira/loading-dots) (MIT)
+- [LoadingDots for Android](https://github.com/EyalBira/loading-dots) (MIT)
