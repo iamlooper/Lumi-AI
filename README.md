@@ -18,10 +18,10 @@ Experience the convenience of having a versatile and engaging conversational par
 Discover a new level of interaction and connectivity with our personalized conversational companion. Embrace the future of AI-powered companionship and unlock a world of possibilities.
 
 ## Screenshots 📱
-[<img src="https://github.com/iamlooper/VIC/raw/main/screenshots/ss_01.png" width=140>](https://github.com/iamlooper/VIC/raw/main/screenshots/ss_01.jpg)
-[<img src="https://github.com/iamlooper/VIC/raw/main/screenshots/ss_02.png" width=140>](https://github.com/iamlooper/VIC/raw/main/screenshots/ss_02.jpg)
-[<img src="https://github.com/iamlooper/VIC/raw/main/screenshots/ss_03.png" width=140>](https://github.com/iamlooper/VIC/raw/main/screenshots/ss_03.jpg)
-[<img src="https://github.com/iamlooper/VIC/raw/main/screenshots/ss_04.png" width=140>](https://github.com/iamlooper/VIC/raw/main/screenshots/ss_04.jpg)
+[<img src="https://github.com/iamlooper/VIC/raw/main/screenshots/ss_01.png" width=140>](https://github.com/iamlooper/VIC/raw/main/screenshots/ss_01.png)
+[<img src="https://github.com/iamlooper/VIC/raw/main/screenshots/ss_02.png" width=140>](https://github.com/iamlooper/VIC/raw/main/screenshots/ss_02.png)
+[<img src="https://github.com/iamlooper/VIC/raw/main/screenshots/ss_03.png" width=140>](https://github.com/iamlooper/VIC/raw/main/screenshots/ss_03.png)
+[<img src="https://github.com/iamlooper/VIC/raw/main/screenshots/ss_04.png" width=140>](https://github.com/iamlooper/VIC/raw/main/screenshots/ss_04.png)
 
 ## Support 💙
 If you liked any one of my projects then consider supporting me via following:
