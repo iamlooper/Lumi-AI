@@ -5,8 +5,9 @@ Your personalized conversational companion with dynamic personas, changeable con
 
 ## Download 📲
 You can download VIC from the following:
+- [Play Store](https://play.google.com/store/apps/details?id=com.looper.vic)
 - [Pling](https://www.pling.com/p/2059807)
-- [Buy me a coffee](https://buymeacoffee.com/iamlooper/posts) (Early access)
+- [Buy Me a Coffee](https://buymeacoffee.com/iamlooper/posts) (Early access)
 
 ## Description 📝
 Introducing VIC (Versatile Intelligent Chatbot), a personalized AI assistant designed to cater to your every need. With dynamic personas and a changeable conversation style, this companion adapts to your preferences, ensuring a truly customized experience.
@@ -25,8 +26,8 @@ Discover a new level of interaction and connectivity with our personalized conve
 
 ## Support Me 💙
 If you liked any one of my projects then consider supporting me via following:
-- [Buy me a coffee](https://buymeacoffee.com/iamlooper/membership)
-- [Join telegram channel](https://loopprojects.t.me)
+- [Buy Me a Coffee](https://buymeacoffee.com/iamlooper/membership)
+- [Telegram Channel](https://loopprojects.t.me)
 
 ## Credits 👥
 Due to the combined efforts and expertise of the following people, this project has achieved its success:
