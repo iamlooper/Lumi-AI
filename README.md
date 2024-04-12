@@ -41,6 +41,7 @@ Due to the combined efforts and expertise of the following people, this project 
 - [Emulond Argent](https://t.me/Emulond) (Tester)
 - [Chirag](https://t.me/selfmuser) (Tester)
 - [leafinferno](https://t.me/leafinferno) (Tester)
+- [Fluph](https://t.me/fluphish) (Tester)
 - [Quick ⚡](https://t.me/username0136) (Tester)
 - [decipher](https://t.me/decipher3114) (Tester)
 - [NMPS](https://t.me/NAVISAVIO) (Tester)
