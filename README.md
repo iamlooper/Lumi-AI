@@ -38,6 +38,7 @@ Due to the combined efforts and expertise of the following people, this project 
 - [Aerath Xlythe](https://t.me/KaldirimMuhendisi) (Developer)
 - [DrDisagree](https://t.me/DrDisagree) (Developer)
 - [Waze](https://t.me/XelXen) (Designer)
+- [Inulute](https://gitHub.com/inulute) (Designer)
 - [Emulond Argent](https://t.me/Emulond) (Tester)
 - [Chirag](https://t.me/selfmuser) (Tester)
 - [leafinferno](https://t.me/leafinferno) (Tester)
