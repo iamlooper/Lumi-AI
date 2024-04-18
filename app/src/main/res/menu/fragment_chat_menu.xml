@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/new_chat"
+        android:title="@string/chat_new"
+        android:icon="@drawable/ic_add"
+        android:visible="false"
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction" />
+
+    <item
+        android:id="@+id/delete_chat"
+        android:title="@string/chat_delete"
+        android:visible="false"
+        app:showAsAction="never" />
+
+</menu>

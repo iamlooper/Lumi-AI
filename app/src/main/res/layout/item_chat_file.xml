@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.chip.Chip xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="@dimen/dp_medium"
+    android:ellipsize="end"
+    android:maxWidth="138dp"
+    android:textColor="?colorOnBackground"
+    app:chipCornerRadius="@dimen/dp_xxlarge"
+    app:chipIcon="@drawable/ic_file"
+    app:chipIconTint="?colorOnBackground"
+    app:closeIconEnabled="true"
+    app:closeIconTint="?colorOnBackground"
+    tools:text="My dream.png" />

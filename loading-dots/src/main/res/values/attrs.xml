@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="LoadingDots">
+        <attr name="LoadingDots_auto_play" format="boolean"/>
+
+        <attr name="LoadingDots_dots_color" format="color"/>
+        <attr name="LoadingDots_dots_count" format="integer"/>
+        <attr name="LoadingDots_dots_size" format="dimension"/>
+        <attr name="LoadingDots_dots_space" format="dimension"/>
+
+        <attr name="LoadingDots_loop_duration" format="integer"/>
+        <attr name="LoadingDots_loop_start_delay" format="integer"/>
+
+        <attr name="LoadingDots_jump_duration" format="integer"/>
+        <attr name="LoadingDots_jump_height" format="dimension"/>
+    </declare-styleable>
+
+</resources>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context=".fragment.VoiceAssistantFragment">
+
+    <com.eyalbira.loadingdots.LoadingDots
+        android:id="@+id/waveform_seek_bar"
+        app:LoadingDots_dots_size="@dimen/dp_xxlarge"
+        app:LoadingDots_dots_color="?colorOnBackground"
+        app:LoadingDots_auto_play="false"
+        app:LoadingDots_jump_height="@dimen/dp_xxxlarge"
+        app:LoadingDots_dots_count="5"
+        app:LoadingDots_loop_duration="1200"
+        app:LoadingDots_loop_start_delay="100"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:id="@+id/text_speak_result"
+        android:layout_marginTop="@dimen/dp_large"
+        android:layout_marginBottom="@dimen/dp_large"
+        tools:text="Hello world"
+        android:gravity="center"
+        android:paddingStart="@dimen/dp_large"
+        android:paddingEnd="@dimen/dp_large"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <Button
+                style="?attr/materialIconButtonFilledTonalStyle"
+                app:icon="@drawable/ic_speak"
+                app:iconGravity="textEnd"
+                app:iconSize="56dp"
+                android:id="@+id/button_start_speak"
+                android:layout_width="96dp"
+                android:layout_height="96dp" />
+
+            <Button
+                style="?attr/materialIconButtonFilledTonalStyle"
+                app:icon="@drawable/ic_stop"
+                app:iconGravity="textEnd"
+                app:iconSize="56dp"
+                android:id="@+id/button_end_speak"
+                android:visibility="gone"
+                android:layout_width="96dp"
+                android:layout_height="96dp" />
+
+        </FrameLayout>
+
+        <Button
+            style="?attr/materialIconButtonFilledTonalStyle"
+            app:icon="@drawable/ic_send"
+            app:iconGravity="textEnd"
+            app:iconSize="36dp"
+            android:id="@+id/button_send_speak_result"
+            android:visibility="gone"
+            android:layout_width="72dp"
+            android:layout_height="72dp" />
+    </LinearLayout>
+
+
+</LinearLayout>

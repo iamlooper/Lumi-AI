@@ -1,0 +1,42 @@
+[versions]
+gradle = "8.3.2"
+kotlin = "1.9.22"
+appcompat = "1.6.1"
+core = "1.12.0"
+constraintlayout = "2.1.4"
+navigation = "2.7.7"
+preference = "1.2.1"
+fragment = "1.6.2"
+material = "1.11.0"
+android-support = "android-support-2.2.0"
+okhttp = "4.11.0"
+markwon = "4.6.2"
+better-link-movement-method = "2.2.0"
+secrets-gradle-plugin = "2.0.1"
+room = "2.6.1"
+
+[libraries]
+gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-core = { group = "androidx.core", name = "core-ktx", version.ref = "core" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+androidx-fragment = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment" }
+androidx-navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
+androidx-navigation-ui = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigation" }
+androidx-preference = { group = "androidx.preference", name = "preference-ktx", version.ref = "preference" }
+google-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+looper-utils-android-support = { group = "com.github.iamlooper", name = "utils", version.ref = "android-support" }
+squareup-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+noties-markwon-core = { group = "io.noties.markwon", name = "core", version.ref = "markwon" }
+noties-markwon-linkify = { group = "io.noties.markwon", name = "linkify", version.ref = "markwon" }
+noties-markwon-ext-latex = { group = "io.noties.markwon", name = "ext-latex", version.ref = "markwon" }
+noties-markwon-ext-strikethrough = { group = "io.noties.markwon", name = "ext-strikethrough", version.ref = "markwon" }
+noties-markwon-ext-tables = { group = "io.noties.markwon", name = "ext-tables", version.ref = "markwon" }
+noties-markwon-ext-tasklist = { group = "io.noties.markwon", name = "ext-tasklist", version.ref = "markwon" }
+noties-markwon-image = { group = "io.noties.markwon", name = "image", version.ref = "markwon" }
+noties-markwon-image-glide = { group = "io.noties.markwon", name = "image-glide", version.ref = "markwon" }
+saket-better-link-movement-method = { group = "me.saket", name = "better-link-movement-method", version.ref = "better-link-movement-method" }
+google-secrets-gradle-plugin = { group = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", name = "secrets-gradle-plugin", version.ref = "secrets-gradle-plugin" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }

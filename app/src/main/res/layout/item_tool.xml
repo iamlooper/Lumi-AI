@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="?android:selectableItemBackground"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:padding="@dimen/dp_large"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:id="@android:id/text1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Chat row" />
+
+    <TextView
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:id="@android:id/text2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Chat row description" />
+
+</LinearLayout>

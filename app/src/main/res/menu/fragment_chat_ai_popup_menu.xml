@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/regenerate_response"
+        android:title="@string/chat_regenerate_response" />
+
+    <item
+        android:id="@+id/speak"
+        android:title="@string/chat_speak" />
+
+    <item
+        android:id="@+id/copy_clipboard"
+        android:title="@string/chat_copy_to_clipboard" />
+</menu>

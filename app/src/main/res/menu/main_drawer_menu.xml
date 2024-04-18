@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/fragment_chat"
+            android:icon="@drawable/ic_chat"
+            android:title="@string/title_chat" />
+
+        <item
+            android:id="@+id/fragment_chats"
+            android:icon="@drawable/ic_forum"
+            android:title="@string/title_chats" />
+
+        <item
+            android:id="@+id/fragment_tools"
+            android:icon="@drawable/ic_activity"
+            android:title="@string/title_tools" />
+
+        <item
+            android:id="@+id/fragment_settings"
+            android:icon="@drawable/ic_settings"
+            android:title="@string/title_settings" />
+
+        <item
+            android:id="@+id/fragment_about"
+            android:icon="@drawable/ic_info"
+            android:title="@string/title_about" />
+
+        <item
+            android:visible="false"
+            android:id="@+id/fragment_voice_assistant"
+            android:icon="@drawable/ic_add"
+            android:title="@string/title_voice_assistant" />
+    </group>
+</menu>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="ai_style">
+        <item>Creative</item>
+        <item>Balanced</item>
+        <item>Precise</item>
+    </string-array>
+
+    <string-array name="ai_style_value">
+        <item>creative</item>
+        <item>balanced</item>
+        <item>precise</item>
+    </string-array>
+
+    <string-array name="ai_categories">
+        <item>All</item>
+        <item>Writing</item>
+        <item>Coding</item>
+        <item>Others</item>
+    </string-array>
+
+    <string-array name="ai_category_writing">
+        <item>Content Writer</item>
+        <item>Plagiarism Checker</item>
+        <item>Advertiser</item>
+        <item>Journalist</item>
+        <item>Proof Reader</item>
+    </string-array>
+
+    <string-array name="ai_category_writing_descriptions">
+        <item>Generates any content</item>
+        <item>Checks for plagiarism</item>
+        <item>Create an ad campaign for your product</item>
+        <item>Create report on news and stories</item>
+        <item>Fix issues in your text</item>
+    </string-array>
+
+    <string-array name="ai_category_writing_value">
+        <item>content_writer</item>
+        <item>plagiarism_checker</item>
+        <item>advertiser</item>
+        <item>journalist</item>
+        <item>proof_reader</item>
+    </string-array>
+
+    <string-array name="ai_category_coding">
+        <item>Coder</item>
+        <item>Linux Terminal</item>
+        <item>JavaScript Console</item>
+        <item>SQL Terminal</item>
+        <item>Git Assistant</item>
+    </string-array>
+
+    <string-array name="ai_category_coding_descriptions">
+        <item>Your coding assistant</item>
+        <item>Use simulated linux terminal</item>
+        <item>Console for JS</item>
+        <item>Experiment with data at hand</item>
+        <item>Assistant for Git</item>
+    </string-array>
+
+    <string-array name="ai_category_coding_value">
+        <item>coder</item>
+        <item>linux_terminal</item>
+        <item>javascript_console</item>
+        <item>sql_terminal</item>
+        <item>git_assistant</item>
+    </string-array>
+
+    <string-array name="ai_category_others">
+        <item>Poet</item>
+        <item>Rapper</item>
+        <item>DIY Expert</item>
+        <item>Emoji Translator</item>
+    </string-array>
+
+    <string-array name="ai_category_others_descriptions">
+        <item>Create poems</item>
+        <item>Make rap lyrics using your creativity</item>
+        <item>Get suggestions for DIY projects from an expert!</item>
+        <item>Translate text to emojis</item>
+    </string-array>
+
+    <string-array name="ai_category_others_value">
+        <item>poet</item>
+        <item>rapper</item>
+        <item>diy_expert</item>
+        <item>emoji_translator</item>
+    </string-array>
+</resources>

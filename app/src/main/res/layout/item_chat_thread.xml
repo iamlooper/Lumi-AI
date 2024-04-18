@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:id="@+id/layout_user"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_user_icon"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/user_icon_background"
+            android:scaleType="fitCenter"
+            android:padding="10dp"
+            app:tint="?colorPrimary"
+            app:srcCompat="@drawable/ic_person" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_view_user_chat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_gravity="center"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="@android:color/transparent"
+            app:cardCornerRadius="8dp">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/text_view_user_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="8dp"
+                    android:text="User"
+                    android:textIsSelectable="false"
+                    android:textStyle="bold"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <HorizontalScrollView
+                    android:id="@+id/horizontalScrollView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/dp_medium">
+
+                    <LinearLayout
+                        android:id="@+id/scroll_view_files"
+                        android:orientation="horizontal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                </HorizontalScrollView>
+
+                <TextView
+                    android:id="@+id/text_view_user_chat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:textIsSelectable="false"
+                    tools:text="User message"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_ai"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layout_user">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_ai_icon"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/user_icon_background"
+            android:scaleType="fitCenter"
+            android:padding="10dp"
+            app:tint="?colorPrimary"
+            app:srcCompat="@drawable/ic_psychology" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_view_ai_chat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_gravity="center"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="@android:color/transparent"
+            app:cardCornerRadius="8dp">
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="8dp">
+
+                <TextView
+                    android:id="@+id/text_view_ai_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_name"
+                    android:textIsSelectable="false"
+                    android:textStyle="bold"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <TextView
+                    android:id="@+id/text_view_ai_chat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textIsSelectable="false"
+                    android:layout_below="@id/text_view_ai_name"
+                    android:paddingVertical="8dp"
+                    tools:ignore="SpeakableTextPresentCheck" />
+
+                <com.eyalbira.loadingdots.LoadingDots
+                    android:id="@+id/loading_dots_ai_chat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/text_view_ai_name"
+                    android:paddingVertical="8dp"
+                    app:LoadingDots_dots_size="6dp"
+                    app:LoadingDots_dots_space="4dp"
+                    app:LoadingDots_dots_color="?attr/colorAccent"
+                    app:LoadingDots_loop_duration="1200"
+                    app:LoadingDots_loop_start_delay="300" />
+
+            </RelativeLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
