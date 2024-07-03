@@ -25,12 +25,6 @@
             android:summary="@string/pref_custom_instructions_summary"
             android:title="@string/pref_custom_instructions_title" />
 
-        <SwitchPreferenceCompat
-            android:defaultValue="true"
-            android:icon="@drawable/ic_airwave"
-            android:key="pref_streaming_response"
-            android:title="@string/pref_streaming_response_title" />
-
     </PreferenceCategory>
 
 </PreferenceScreen>

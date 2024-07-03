@@ -42,27 +42,25 @@ import com.looper.vic.adapter.ChatFilesAdapter
 import com.looper.vic.model.Chat
 import com.looper.vic.model.ChatRequest
 import com.looper.vic.model.ChatResponse
-import com.looper.vic.model.ChatResponseStream
 import com.looper.vic.model.ChatThread
 import com.looper.vic.model.ChatTitleRequest
-import com.looper.vic.service.ApiService
 import com.looper.vic.util.AESUtils
 import com.looper.vic.util.ChatUtils
 import com.looper.vic.util.HashUtils
-import com.looper.vic.util.RetrofitUtils
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.ResponseBody
+import okhttp3.Response
 import okhttp3.sse.EventSource
 import okhttp3.sse.EventSourceListener
 import okhttp3.sse.EventSources
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.io.File
+import java.io.IOException
 import java.net.SocketTimeoutException
+import java.util.concurrent.TimeUnit
 
 open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener, MenuProvider {
 
@@ -71,19 +69,16 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
         chatFilesAdapter.addFiles(it)
     }
     private val okHttpClientBuilder: OkHttpClient.Builder =
-        RetrofitUtils.createOkHttpClientBuilder()
-    private val apiService: ApiService = RetrofitUtils.createService(
-        ApiService::class.java,
-        BuildConfig.apiBaseUrl,
-        okHttpClientBuilder
-    )
+        OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(100, TimeUnit.SECONDS)
+            .writeTimeout(100, TimeUnit.SECONDS)
     private val encryptKey: ByteArray = AESUtils.keyFromString(BuildConfig.encryptBase64Key)
     private var chatId: Int = -1
     private var toolType: String? = null
     private var fragmentMenu: Menu? = null
-    private var apiRequestCall1: Call<ChatResponse>? = null
-    private var apiRequestCall2: EventSource? = null
-    private var apiRequestCall3: Call<ResponseBody>? = null
+    private var apiRequestCall1: EventSource? = null
+    private var apiRequestCall2: Call? = null
     private lateinit var navController: NavController
     private lateinit var sharedPreferencesUtils: SharedPreferencesUtils
     private lateinit var speechUtils: SpeechUtils
@@ -504,78 +499,10 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
         val encryptedJson = AESUtils.encrypt(json, encryptKey)
 
         // Get response from API.
-        if (stream) {
-            getAIResponseStream(encryptedJson, thread)
-        } else {
-            getAIResponse(encryptedJson, thread)
-        }
+        getAIResponse(encryptedJson, thread)
     }
 
     private fun getAIResponse(
-        jsonString: String,
-        thread: ChatThread
-    ) {
-        // Send API request.
-        apiRequestCall1 = apiService.chat(jsonString)
-
-        // Enqueue the API call.
-        apiRequestCall1?.enqueue(object : Callback<ChatResponse> {
-            override fun onResponse(
-                call: Call<ChatResponse>,
-                response: Response<ChatResponse>
-            ) {
-                if (response.isSuccessful) {
-                    val aiResponse = response.body()?.response ?: ""
-                    val files = response.body()?.files ?: emptyList()
-
-                    activity?.runOnUiThread {
-                        // Update the thread with response.
-                        chatAdapter.updateThreadWithResponse(
-                            thread,
-                            aiResponse,
-                            files
-                        )
-                    }
-
-                    // Process chat title if it is a new chat.
-                    if (chatAdapter.itemCount == 1) {
-                        processChatTitle(thread)
-                    }
-                } else {
-                    activity?.runOnUiThread {
-                        cancelQuery(thread, unexpectedErrorResponse)
-                    }
-                }
-                // Speak if it is a voice input.
-                if (thread.isVoiceInput && !thread.isCancelled) {
-                    speechUtils.speak(thread.aiContent)
-                }
-
-                activity?.runOnUiThread {
-                    // Hide stop button and show send button.
-                    querySpeakButton.visibility = View.VISIBLE
-                    querySendButton.visibility = View.VISIBLE
-                    queryStopButton.visibility = View.INVISIBLE
-                }
-            }
-
-            override fun onFailure(call: Call<ChatResponse>, t: Throwable) {
-                activity?.runOnUiThread {
-                    when (t) {
-                        is SocketTimeoutException -> {
-                            cancelQuery(thread, networkErrorResponse)
-                        }
-
-                        else -> {
-                            cancelQuery(thread, unexpectedErrorResponse)
-                        }
-                    }
-                }
-            }
-        })
-    }
-
-    private fun getAIResponseStream(
         jsonString: String,
         thread: ChatThread
     ) {
@@ -593,7 +520,7 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
 
         // Create EventSource listener.
         val eventSourceListener = object : EventSourceListener() {
-            override fun onOpen(eventSource: EventSource, response: okhttp3.Response) {
+            override fun onOpen(eventSource: EventSource, response: Response) {
                 // No operation.
             }
 
@@ -616,7 +543,7 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
                 val fixedLine = decodedString.replace("}{", "}\n{").split("\n")
                 fixedLine.forEach { part ->
                     try {
-                        val jsonData = Gson().fromJson(part, ChatResponseStream::class.java)
+                        val jsonData = Gson().fromJson(part, ChatResponse::class.java)
 
                         activity?.runOnUiThread {
                             // Update the thread with files.
@@ -659,7 +586,7 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
             override fun onFailure(
                 eventSource: EventSource,
                 t: Throwable?,
-                response: okhttp3.Response?
+                response: Response?
             ) {
                 activity?.runOnUiThread {
                     when (t) {
@@ -676,7 +603,7 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
         }
 
         // Create EventSource.
-        apiRequestCall2 =
+        apiRequestCall1 =
             EventSources.createFactory(client).newEventSource(request, eventSourceListener)
     }
 
@@ -699,17 +626,29 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
         val json = Gson().toJson(jsonRequestData)
         val encryptedJson = AESUtils.encrypt(json, encryptKey)
 
+        // Build okhttp client.
+        val client = okHttpClientBuilder.build()
+
+        // Build request body.
+        val requestBody = encryptedJson.toRequestBody("text/plain".toMediaTypeOrNull())
+
+        // Build request.
+        val request = Request.Builder()
+            .url(BuildConfig.apiBaseUrl + "v1/title")
+            .post(requestBody)
+            .build()
+
         // Send API request.
-        apiRequestCall3 = apiService.getChatTitle(encryptedJson)
+        apiRequestCall2 = client.newCall(request)
 
         // Enqueue the API call.
-        apiRequestCall3?.enqueue(object : Callback<ResponseBody> {
+        apiRequestCall2?.enqueue(object : Callback {
             override fun onResponse(
-                call: Call<ResponseBody>,
-                response: Response<ResponseBody>
+                call: Call,
+                response: Response
             ) {
                 val chatTitle: String = if (response.isSuccessful) {
-                    response.body()?.string() ?: userQuery
+                    response.body?.string() ?: userQuery
                 } else {
                     userQuery
                 }
@@ -726,7 +665,7 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
                 }
             }
 
-            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+            override fun onFailure(call: Call, e: IOException) {
                 // No operation.
             }
         })
@@ -828,10 +767,8 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
     private fun cancelRequestCalls() {
         apiRequestCall1?.cancel()
         apiRequestCall2?.cancel()
-        apiRequestCall3?.cancel()
         apiRequestCall1 = null
         apiRequestCall2 = null
-        apiRequestCall3 = null
     }
 
     private fun getVoiceInput() {

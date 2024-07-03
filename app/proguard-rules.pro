@@ -20,6 +20,20 @@
 # hide the original source file name.
 -renamesourcefileattribute SourceFile
 
+# Keep all model classes in the specified package.
+-keep class com.looper.vic.model.** { *; }
+
+# Gson uses generic type information stored in a class file.
+-keepattributes Signature
+
+# For using GSON @Expose annotation.
+-keepattributes *Annotation*
+
+# Keep Gson classes and methods.
+-keep class sun.misc.Unsafe { *; }
+-keep class com.google.gson.stream.** { *; }
+-keep class com.google.gson.** { *; }
+
 # Misc.
 -dontskipnonpubliclibraryclasses
 -dontskipnonpubliclibraryclassmembers

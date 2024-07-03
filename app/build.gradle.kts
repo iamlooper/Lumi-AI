@@ -85,12 +85,12 @@ dependencies {
 
     implementation(libs.squareup.okhttp)
     implementation(libs.squareup.okhttp.sse)
-    implementation(libs.squareup.retrofit)
-    implementation(libs.squareup.retrofit.gson)
 
     implementation(libs.androidx.room.runtime)
     annotationProcessor(libs.androidx.room.compiler)
     ksp(libs.androidx.room.compiler)
+
+    implementation(libs.google.code.gson)
 
     implementation(libs.looper.android.support)
 

@@ -60,8 +60,6 @@
     <string name="pref_custom_instructions_summary">Modify the behavior of the AI</string>
     <string name="pref_custom_instructions_input_hint">Type your instructions here</string>
 
-    <string name="pref_streaming_response_title">Streaming response</string>
-
     <!-- About -->
     <string name="about_app_developed_by">Developed by <a href="https://github.com/iamlooper">Looper</a></string>
     <string name="about_app_more_info">More information: <a href="https://github.com/iamlooper/Lumi-AI">Click here</a>\n(description, credits and licenses etc.)</string>
