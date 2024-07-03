@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.1.0-beta-20240703
+- Added support for streaming response
+- Increased file size limit to 5MB
+- Added support to upload audio and video
+- App performance improvement
+- Misc. changes
+
 ## v2.0.0
 - Rebranded from VIC to Lumi AI
 - Redesigned UI
