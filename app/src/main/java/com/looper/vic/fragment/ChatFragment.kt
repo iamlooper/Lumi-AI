@@ -431,7 +431,6 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
             timestamp,
             BuildConfig.apiKey
         )
-        val stream = sharedPreferencesUtils.getBoolean("pref_streaming_response", true)
 
         // Prepare local files.
         val fileNames: MutableList<String> = mutableListOf()
@@ -490,7 +489,7 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
                 "pref_custom_instructions",
                 ""
             ) else "",
-            stream = stream,
+            stream = true,
             files = filesList
         )
 
