@@ -1,8 +1,16 @@
+import java.text.SimpleDateFormat
+import java.util.Date
+
+fun getCurrentDate(): String {
+    return SimpleDateFormat("yyyyMMdd").format(Date())
+}
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
-    id("com.google.devtools.ksp") version "1.9.22-1.0.17"
+    id("com.google.devtools.ksp")
+    id("androidx.room")
 }
 
 android {
@@ -13,8 +21,8 @@ android {
         applicationId = "com.looper.vic"
         minSdk = 27
         targetSdk = 34
-        versionCode = 37
-        versionName = "2.0.0"
+        versionCode = 39
+        versionName = "2.1.0-beta-" + getCurrentDate()
 
         vectorDrawables.useSupportLibrary = true
     }
@@ -46,8 +54,11 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
-    }    
-    
+    }
+
+    room {
+        schemaDirectory("$projectDir/schemas")
+    }
 }
 
 dependencies {
@@ -73,12 +84,15 @@ dependencies {
     implementation(libs.saket.better.link.movement.method)
 
     implementation(libs.squareup.okhttp)
+    implementation(libs.squareup.okhttp.sse)
+    implementation(libs.squareup.retrofit)
+    implementation(libs.squareup.retrofit.gson)
 
     implementation(libs.androidx.room.runtime)
     annotationProcessor(libs.androidx.room.compiler)
     ksp(libs.androidx.room.compiler)
 
-    implementation(libs.looper.utils.android.support)
+    implementation(libs.looper.android.support)
 
     implementation(project(":loading-dots"))
 }

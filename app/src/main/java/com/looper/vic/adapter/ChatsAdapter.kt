@@ -15,6 +15,7 @@ class ChatsAdapter : RecyclerView.Adapter<ViewHolder>() {
     private var filteredChatIds: List<Int> = emptyList()
 
     var onItemClick: ((Int) -> Unit)? = null
+    var onItemLongClick: ((Int, Int) -> Boolean)? = null
 
     init {
         chatIds = MyApp.chatDao().getAllChatIds().reversed()
@@ -44,11 +45,14 @@ class ChatsAdapter : RecyclerView.Adapter<ViewHolder>() {
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val chatId = filteredChatIds[position]
-
         val chatTitleView = holder.itemView.findViewById<TextView>(android.R.id.text1)
 
         holder.itemView.setOnClickListener {
             onItemClick?.invoke(chatId)
+        }
+
+        holder.itemView.setOnLongClickListener {
+            onItemLongClick?.invoke(chatId, position)!!
         }
 
         chatTitleView.text = ChatUtils.getChatTitle(chatId)

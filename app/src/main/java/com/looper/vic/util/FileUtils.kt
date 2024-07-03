@@ -6,32 +6,48 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.OpenableColumns
-import com.looper.android.support.util.UIUtils
+import android.widget.Toast
+import com.looper.vic.R
 import java.io.File
+import java.io.IOException
+import java.io.InputStream
 import java.text.DecimalFormat
 
 object FileUtils {
-    private const val FILE_SIZE = 2 * 1024 * 1024
+    private const val FILE_SIZE = 5 * 1024 * 1024
 
     fun validateFile(context: Context, uri: Uri, allowedExts: Array<String>): Boolean {
         val name = getFileName(context.contentResolver, uri)
         val ext = name.substringAfterLast('.', "")
 
-        if (!allowedExts.contains(".$ext")) {
-            UIUtils.showToast(
+        if (isFileEmpty(context.contentResolver, uri)) {
+            Toast.makeText(
                 context,
-                "File ($name) is not supported",
-                UIUtils.TOAST_LENGTH_SHORT
-            )
+                context.getString(R.string.file_empty, name),
+                Toast.LENGTH_SHORT
+            ).show()
             return false
         }
 
         if (!isFileSizeValid(context.contentResolver, uri)) {
-            UIUtils.showToast(
+            Toast.makeText(
                 context,
-                "File ($name) exceeds the size limit of 2MB",
-                UIUtils.TOAST_LENGTH_SHORT
-            )
+                context.getString(R.string.file_exceeds_size_limit, name, formatFileSize(FILE_SIZE.toLong())),
+                Toast.LENGTH_SHORT
+            ).show()
+            return false
+        }
+
+        if (isTextFile(context.contentResolver, uri)) {
+            return true
+        }
+
+        if (!allowedExts.contains(ext)) {
+            Toast.makeText(
+                context,
+                context.getString(R.string.file_not_supported, name),
+                Toast.LENGTH_SHORT
+            ).show()
             return false
         }
 
@@ -56,25 +72,6 @@ object FileUtils {
             kiloBytes >= 1.0 -> "${formatter.format(kiloBytes)} KB"
             else -> "$sizeInBytes bytes"
         }
-    }
-
-    fun isFileValid(
-        contentResolver: ContentResolver,
-        uri: Uri,
-        allowedExts: Array<String>
-    ): Boolean {
-        if (!isFileSizeValid(contentResolver, uri)) {
-            return false
-        }
-
-        val name = getFileName(contentResolver, uri)
-        val dotIndex = name.lastIndexOf('.')
-        if (dotIndex < 0) {
-            return false
-        }
-
-        val ext = name.substring(dotIndex)
-        return allowedExts.contains(ext)
     }
 
     @SuppressLint("Range")
@@ -111,6 +108,43 @@ object FileUtils {
             Uri.fromFile(file)
         } else {
             null
+        }
+    }
+
+    private fun isTextFile(contentResolver: ContentResolver, uri: Uri): Boolean {
+        return try {
+            // Define the range of printable ASCII characters.
+            val printableChars = 32..126
+            val newLineChars = listOf(10, 13) // \n and \r
+
+            contentResolver.openInputStream(uri)?.use { inputStream ->
+                // Read the file byte by byte.
+                var byte = inputStream.read()
+                while (byte != -1) {
+                    if (byte !in printableChars && byte !in newLineChars) {
+                        return false // Found a non-printable character, it's a binary file.
+                    }
+                    byte = inputStream.read()
+                }
+            }
+            true // All characters are printable, it's a text file.
+        } catch (e: IOException) {
+            e.printStackTrace()
+            false // In case of an error, assume it's not a text file.
+        }
+    }
+
+    private fun isFileEmpty(contentResolver: ContentResolver, fileUri: Uri): Boolean {
+        var inputStream: InputStream? = null
+        return try {
+            inputStream = contentResolver.openInputStream(fileUri)
+            val fileSize = inputStream?.available() ?: 0
+            fileSize == 0
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        } finally {
+            inputStream?.close()
         }
     }
 }

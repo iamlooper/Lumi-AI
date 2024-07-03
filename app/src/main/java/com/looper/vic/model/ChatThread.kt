@@ -13,7 +13,6 @@ data class ChatThread(
     @ColumnInfo(name = "pending") var isPending: Boolean = false,
     @ColumnInfo(name = "voice") var isVoiceInput: Boolean = false,
     @ColumnInfo(name = "cancelled") var isCancelled: Boolean = false,
-    @ColumnInfo(name = "files_names") var filesNames: List<String> = listOf(),
-    @ColumnInfo(name = "web_search_results") var webSearchResults: String = "",
-    @ColumnInfo(name = "files_contents") var filesContents: String = ""
+    @ColumnInfo(name = "local_files") var localFiles: List<String> = emptyList(),
+    @ColumnInfo(name = "ai_files") var aiFiles: List<String> = emptyList()
 )

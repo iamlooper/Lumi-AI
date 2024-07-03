@@ -1,7 +1,11 @@
 package com.looper.vic.util
 
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.NavHostFragment
 import com.looper.vic.MyApp
 import com.looper.vic.R
+import com.looper.vic.activity.MainActivity
 import com.looper.vic.model.Chat
 import com.looper.vic.model.ChatThread
 import kotlin.random.Random
@@ -19,9 +23,9 @@ object ChatUtils {
     }
 
     fun getChatTitle(chatId: Int): String {
-        var retValue = ""
+        val retValue: String
         val title = MyApp.chatDao().getChatTitleSQL(chatId)
-        retValue = if (title != null && title.isNotEmpty()) {
+        retValue = if (!title.isNullOrEmpty()) {
             title
         } else {
             val list = MyApp.chatDao().getAllThreads(chatId)
@@ -44,21 +48,10 @@ object ChatUtils {
         return "$retValue$addition".trim()
     }
 
-    fun getChatFiles(chatId: Int): Set<String> {
-        val threads = MyApp.chatDao().getAllThreads(chatId)
-        val out = mutableListOf<String>()
-
-        for (thread in threads) {
-            out += thread.filesNames
-        }
-
-        return out.toSet()
-    }
-
     fun insertAllThreads(vararg threads: ChatThread) {
         MyApp.chatDao().insertAllThreadsSQL(*threads)
 
-        val chats = ArrayList<Chat>(MyApp.chatDao().getAllChats())
+        val chats = MyApp.chatDao().getAllChats().toMutableList()
         for (thread in threads) {
             if (chats.find { it.chatId == thread.chatId } == null) {
                 val newChat = Chat(
@@ -73,14 +66,61 @@ object ChatUtils {
     }
 
     fun deleteThread(thread: ChatThread) {
-        MyApp.chatDao().deleteThreadSQL(thread)
+        MyApp.chatDao().deleteThread(thread)
         if (MyApp.chatDao().getAllThreads(thread.chatId).isEmpty()) {
             deleteAllThreadsOfChat(thread.chatId)
         }
     }
 
     fun deleteAllThreadsOfChat(chatId: Int) {
-        MyApp.chatDao().deleteAllThreadsOfChatSQL(chatId)
+        MyApp.chatDao().deleteAllThreadsOfChat(chatId)
         MyApp.chatDao().deleteChat(MyApp.chatDao().getChat(chatId)!!)
+    }
+
+    fun setChatTitle(
+        activity: AppCompatActivity?,
+        fragment: Fragment,
+        chatId: Int,
+        toolType: String?,
+        title: String?
+    ) {
+        val actualTitle: String
+
+        if (title != null) {
+            var chat = MyApp.chatDao().getChat(chatId)
+            if (chat == null) {
+                chat = Chat(
+                    chatId = chatId,
+                    chatTitle = title,
+                    tool = toolType,
+                )
+                MyApp.chatDao().insertChat(chat)
+            } else {
+                chat.chatTitle = title
+                chat.tool = toolType
+                MyApp.chatDao().updateChat(chat)
+            }
+
+            actualTitle = getChatTitle(chatId)
+        } else {
+            actualTitle = getChatTitle(chatId)
+        }
+
+        if (activity != null) {
+            val navHostFragment = activity
+                .supportFragmentManager
+                .findFragmentById(com.looper.android.support.R.id.fragment_container_view_content_main) as NavHostFragment
+
+            // Set title on the navigation drawer.
+            (activity as MainActivity).setDrawerFragmentTitle(
+                R.id.fragment_chat,
+                actualTitle
+            )
+
+            // Set title to action bar if the current fragment is being shown.
+            if (navHostFragment.childFragmentManager.primaryNavigationFragment == fragment) {
+                activity.supportActionBar?.title = actualTitle
+            }
+        }
     }
 }

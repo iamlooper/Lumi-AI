@@ -3,7 +3,7 @@ package com.looper.vic.fragment
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -14,6 +14,8 @@ import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts.OpenMultipleDocuments
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -22,96 +24,122 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
-import com.looper.android.support.util.AppUtils
-import com.looper.android.support.util.CoroutineUtils
-import com.looper.android.support.util.OkHttpUtils
-import com.looper.android.support.util.SharedPreferenceUtils
+import com.google.gson.Gson
+import com.looper.android.support.util.SharedPreferencesUtils
 import com.looper.android.support.util.SpeechUtils
 import com.looper.android.support.util.SystemServiceUtils
 import com.looper.vic.BuildConfig
 import com.looper.vic.MyApp
 import com.looper.vic.R
-import com.looper.vic.activity.MainActivity
 import com.looper.vic.adapter.ChatAdapter
 import com.looper.vic.adapter.ChatFilesAdapter
 import com.looper.vic.model.Chat
+import com.looper.vic.model.ChatRequest
+import com.looper.vic.model.ChatResponse
+import com.looper.vic.model.ChatResponseStream
 import com.looper.vic.model.ChatThread
+import com.looper.vic.model.ChatTitleRequest
+import com.looper.vic.service.ApiService
+import com.looper.vic.util.AESUtils
 import com.looper.vic.util.ChatUtils
-import com.looper.vic.util.SignUtils
-import okhttp3.Response
-import org.json.JSONObject
-import java.io.IOException
-import com.google.android.material.button.MaterialButton as Button
+import com.looper.vic.util.HashUtils
+import com.looper.vic.util.RetrofitUtils
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.ResponseBody
+import okhttp3.sse.EventSource
+import okhttp3.sse.EventSourceListener
+import okhttp3.sse.EventSources
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.io.File
+import java.net.SocketTimeoutException
 
+open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener, MenuProvider {
 
-open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener {
-
-    // Declare variables.
+    // Declare and initialize variables.
+    private val fileSelector = registerForActivityResult(OpenMultipleDocuments()) {
+        chatFilesAdapter.addFiles(it)
+    }
+    private val okHttpClientBuilder: OkHttpClient.Builder =
+        RetrofitUtils.createOkHttpClientBuilder()
+    private val apiService: ApiService = RetrofitUtils.createService(
+        ApiService::class.java,
+        BuildConfig.apiBaseUrl,
+        okHttpClientBuilder
+    )
+    private val encryptKey: ByteArray = AESUtils.keyFromString(BuildConfig.encryptBase64Key)
+    private var chatId: Int = -1
+    private var toolType: String? = null
+    private var fragmentMenu: Menu? = null
+    private var apiRequestCall1: Call<ChatResponse>? = null
+    private var apiRequestCall2: EventSource? = null
+    private var apiRequestCall3: Call<ResponseBody>? = null
     private lateinit var navController: NavController
-    private lateinit var sharedPreferenceUtils: SharedPreferenceUtils
-    private lateinit var okHttpUtils: OkHttpUtils
+    private lateinit var sharedPreferencesUtils: SharedPreferencesUtils
     private lateinit var speechUtils: SpeechUtils
     private lateinit var scrollViewNewChat: NestedScrollView
     private lateinit var recyclerView: RecyclerView
     private lateinit var recyclerViewLayoutManager: RecyclerView.LayoutManager
     private lateinit var recyclerViewFiles: RecyclerView
     private lateinit var queryInputBox: TextInputEditText
-    private lateinit var querySendButton: Button
-    private lateinit var queryStopButton: Button
-    private lateinit var querySpeakButton: Button
-    private lateinit var queryAddFilesButton: Button
+    private lateinit var querySendButton: MaterialButton
+    private lateinit var queryStopButton: MaterialButton
+    private lateinit var querySpeakButton: MaterialButton
+    private lateinit var queryAddFilesButton: MaterialButton
+    private lateinit var fabArrowDown: FloatingActionButton
     private lateinit var chatAdapter: ChatAdapter
     private lateinit var chatFilesAdapter: ChatFilesAdapter
-    private lateinit var coroutineUtils: CoroutineUtils
     private lateinit var layoutFooter: LinearLayout
     private lateinit var paddingConsumer: LinearLayout
     private lateinit var userCancelledResponse: String
     private lateinit var networkErrorResponse: String
     private lateinit var unexpectedErrorResponse: String
     private lateinit var chatThread: ChatThread
-    private var toolType: String? = null
-    private var menu: Menu? = null
-    private var chatId: Int = -1
-    private val fileSelector = registerForActivityResult(OpenMultipleDocuments()) {
-        chatFilesAdapter.addFiles(it)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_chat, container, false)
-
-        // Enable options menu in the fragment.
-        @Suppress("DEPRECATION")
-        setHasOptionsMenu(true)
-
-        return view
+        return inflater.inflate(R.layout.fragment_chat, container, false)
     }
 
     override fun onDestroyView() {
         navController.removeOnDestinationChangedListener(this)
+
         super.onDestroyView()
     }
 
     override fun onDestroy() {
+        // Cancel all calls.
+        cancelRequestCalls()
+
         speechUtils.destroy()
+
         if (chatAdapter.getThreadsOfChat().isNotEmpty()) {
             val thread = chatAdapter.getThreadsOfChat().last()
+            if ((userCancelledResponse as String?) == null) {
+                userCancelledResponse = requireContext().getString(R.string.user_cancelled_response)
+            }
             cancelQuery(thread, userCancelledResponse)
         }
+
         super.onDestroy()
     }
 
     override fun onPause() {
         speechUtils.stopTextToSpeech()
+
         super.onPause()
     }
 
@@ -126,13 +154,11 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
             cid
         } else {
             ChatUtils.generateNewChatId().also {
-                // Put the generated chat id in the arguments
-                // to prevent chat resets when the theme changed.
+                // Put the generated chat id in the arguments to prevent chat resets from device changes.
                 if (arguments == null) {
                     arguments = Bundle()
                 }
-
-                requireArguments().putInt("chatId", it)
+                arguments?.putInt("chatId", it)
             }
         }
 
@@ -162,21 +188,19 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
             // Make the thread pending and clear previous AI response.
             thread.isPending = true
             thread.isCancelled = false
+            thread.aiContent = ""
             MyApp.chatDao().updateThread(thread)
             chatAdapter.notifyItemChanged(chatAdapter.getThreadIndexById(thread.id))
 
-            // Show recycler view.
+            // Show recycler view and scroll to the thread.
             scrollViewNewChat.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
+            recyclerViewLayoutManager.scrollToPosition(chatAdapter.getThreadIndexById(thread.id))
 
             // Show stop button.
             querySpeakButton.visibility = View.GONE
             querySendButton.visibility = View.INVISIBLE
             queryStopButton.visibility = View.VISIBLE
-
-            // Scroll to the thread and show recyclerView.
-            recyclerViewLayoutManager.scrollToPosition(chatAdapter.getThreadIndexById(thread.id))
-            recyclerView.visibility = View.VISIBLE
 
             // Process AI response.
             processAIResponse(thread)
@@ -186,17 +210,18 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Set chat title.
-        val title = ChatUtils.getChatTitle(chatId)
-        setChatTitle(title)
+        // Setup MenuProvider.
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
+
+        // Set the chat title.
+        ChatUtils.setChatTitle(activity as AppCompatActivity?, this, chatId, toolType, null)
 
         // Initialize variables and views.
         navController = view.findNavController()
         navController.addOnDestinationChangedListener(this)
-        sharedPreferenceUtils = SharedPreferenceUtils.getInstance(requireContext())
-        okHttpUtils = OkHttpUtils()
-        coroutineUtils = CoroutineUtils()
-        chatFilesAdapter = ChatFilesAdapter(requireContext(), coroutineUtils, chatId)
+        sharedPreferencesUtils = SharedPreferencesUtils.getInstance(requireContext())
+        chatFilesAdapter = ChatFilesAdapter(requireContext())
         userCancelledResponse = requireContext().getString(R.string.user_cancelled_response)
         networkErrorResponse = requireContext().getString(R.string.network_error_response)
         unexpectedErrorResponse = requireContext().getString(R.string.unexpected_error_response)
@@ -210,11 +235,9 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
         queryStopButton = view.findViewById(R.id.button_stop_query)
         querySpeakButton = view.findViewById(R.id.button_speak)
         queryAddFilesButton = view.findViewById(R.id.button_add_files)
+        fabArrowDown = view.findViewById(R.id.fab_arrow_down)
         layoutFooter = view.findViewById(R.id.layout_footer)
         paddingConsumer = view.findViewById(R.id.layout_padding_consumer)
-
-        // Hide files button if a tool is triggered.
-        queryAddFilesButton.isEnabled = toolType == null
 
         // Set up RecyclerView.
         recyclerView.adapter = chatAdapter
@@ -228,9 +251,22 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
         )
         recyclerViewFiles.adapter = chatFilesAdapter
 
+        // Add scroll listener to show/hide arrow down FAB.
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                if (!recyclerView.canScrollVertically(1)) { // 1 for down direction.
+                    fabArrowDown.hide()
+                } else {
+                    fabArrowDown.show()
+                }
+            }
+        })
+
         // Show stop button if there is a pending query.
         if (chatAdapter.getThreadsOfChat().isNotEmpty()) {
-            if (chatAdapter.hasPendingQuery(chatAdapter.getThreadsOfChat().last())) {
+            if (chatAdapter.getThreadsOfChat().last().isPending) {
                 querySpeakButton.visibility = View.GONE
                 querySendButton.visibility = View.INVISIBLE
                 queryStopButton.visibility = View.VISIBLE
@@ -254,7 +290,6 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        // Set onClickListener for buttons.
         querySendButton.setOnClickListener { processUserQuery(false) }
 
         queryStopButton.setOnClickListener { cancelQuery(chatThread, userCancelledResponse) }
@@ -262,6 +297,13 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
         querySpeakButton.setOnClickListener { getVoiceInput() }
 
         queryAddFilesButton.setOnClickListener { fileSelector.launch(arrayOf("*/*")) }
+
+        fabArrowDown.setOnClickListener {
+            val lastPosition = chatAdapter.itemCount - 1
+            if (lastPosition >= 0) {
+                recyclerView.smoothScrollToPosition(lastPosition)
+            }
+        }
 
         // Workaround to remove extra top padding of attribute android:fitsSystemWindows="true"
         paddingConsumer.viewTreeObserver.addOnGlobalLayoutListener {
@@ -276,11 +318,43 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
         }
     }
 
-    @Suppress("DEPRECATION")
-    @Deprecated("Deprecated in Java")
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        inflater.inflate(R.menu.fragment_chat_menu, menu)
+    override fun onResume() {
+        super.onResume()
+
+        if (chatAdapter.hasConversation()) {
+            // Show menu items.
+            fragmentMenu?.findItem(R.id.new_chat)?.isVisible = true
+            fragmentMenu?.findItem(R.id.delete_chat)?.isVisible = true
+
+            // Show recycler view.
+            scrollViewNewChat.visibility = View.GONE
+            recyclerView.visibility = View.VISIBLE
+
+            // Set the chat title as it resets.
+            ChatUtils.setChatTitle(activity as AppCompatActivity?, this, chatId, toolType, null)
+        }
+
+        if (toolType != null) {
+            // Show menu items if there is a tool is selected.
+            fragmentMenu?.findItem(R.id.new_chat)?.isVisible = true
+            fragmentMenu?.findItem(R.id.delete_chat)?.isVisible = true
+        }
+    }
+
+    override fun onDestinationChanged(
+        controller: NavController,
+        destination: NavDestination,
+        arguments: Bundle?
+    ) {
+        val handle = controller.currentBackStackEntry?.savedStateHandle
+        val data = handle?.get<String?>("voice_text") ?: return
+        handle.remove<String?>("voice_text")
+        queryInputBox.setText(data)
+        processUserQuery(true)
+    }
+
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.fragment_chat_menu, menu)
 
         // Show menu items if there is a conversation or a tool is selected.
         if (chatAdapter.hasConversation() || toolType != null) {
@@ -289,16 +363,11 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
         }
 
         // Store a reference for future use.
-        this.menu = menu
-
-        super.onCreateOptionsMenu(menu, inflater)
+        fragmentMenu = menu
     }
 
-    @Suppress("DEPRECATION")
-    @Deprecated("Deprecated in Java")
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle menu item selection.
-        return when (item.itemId) {
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        return when (menuItem.itemId) {
             R.id.delete_chat -> {
                 deleteConversation()
                 true
@@ -309,30 +378,7 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
                 true
             }
 
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        // If there is a conversation to display...
-        if (chatAdapter.hasConversation()) {
-            // Show menu items.
-            menu?.findItem(R.id.new_chat)?.isVisible = true
-            menu?.findItem(R.id.delete_chat)?.isVisible = true
-
-            // Show recycler view.
-            scrollViewNewChat.visibility = View.GONE
-            recyclerView.visibility = View.VISIBLE
-
-            // Set the chat title as it resets.
-            val title = ChatUtils.getChatTitle(chatId)
-            setChatTitle(title)
-        } else if (toolType != null) {
-            // Show menu items if there is a tool is selected.
-            menu?.findItem(R.id.new_chat)?.isVisible = true
-            menu?.findItem(R.id.delete_chat)?.isVisible = true
+            else -> false
         }
     }
 
@@ -367,14 +413,13 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
             chatAdapter.addThread(thread)
             chatThread = chatAdapter.getThreadsOfChat().last()
 
-            // Scroll to the new thread and show recyclerView.
-            recyclerViewLayoutManager.scrollToPosition(chatAdapter.getThreadIndexById(thread.id))
-            recyclerView.visibility = View.VISIBLE
+            // Scroll to the new thread.
+            recyclerViewLayoutManager.scrollToPosition(chatAdapter.itemCount - 1)
 
             // Show menu items if there is a conversation.
             if (chatAdapter.hasConversation()) {
-                menu?.findItem(R.id.new_chat)?.isVisible = true
-                menu?.findItem(R.id.delete_chat)?.isVisible = true
+                fragmentMenu?.findItem(R.id.new_chat)?.isVisible = true
+                fragmentMenu?.findItem(R.id.delete_chat)?.isVisible = true
             }
 
             // Process AI response.
@@ -383,112 +428,220 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
     }
 
     private fun processAIResponse(thread: ChatThread) {
-        // Recreate coroutine scope.
-        coroutineUtils.recreateScope()
-
-        // Prepare chat history and options.
-        val historyArray = chatAdapter.getChatHistory(thread)
-        val webSearch = sharedPreferenceUtils
-            .getBoolean("ai_web_search", false) && toolType == null
-        val customInstructions = if (toolType == null) {
-            sharedPreferenceUtils.getString("pref_custom_instructions", "")
-        } else ""
-        val fileNames = ArrayList<String>()
-
-        // Prepare hash.
+        // Initialize variables.
         val userQuery = thread.userContent
         val timestamp = System.currentTimeMillis() / 1000
-        val hash = SignUtils.createSignature(
+        val signatureHash = HashUtils.generateSignHash(
             userQuery.take(10),
             timestamp,
-            AppUtils.getSignatureHash(requireContext()) + BuildConfig.apiSecretKey
+            BuildConfig.apiKey
+        )
+        val stream = sharedPreferencesUtils.getBoolean("pref_streaming_response", true)
+
+        // Prepare local files.
+        val fileNames: MutableList<String> = mutableListOf()
+        val filesList: MutableList<Map<String, String>> = mutableListOf()
+        val files: List<File>
+        if (chatFilesAdapter.itemCount > 0) {
+            files = chatFilesAdapter.saveFiles()
+            for (file in files) {
+                fileNames.add(file.name)
+
+                val fileBytes = file.readBytes()
+                val base64EncodedFileBytes = Base64.encodeToString(fileBytes, Base64.DEFAULT)
+                filesList.add(
+                    mapOf(
+                        "filename" to file.name,
+                        "file_bytes" to base64EncodedFileBytes
+                    )
+                )
+            }
+            chatFilesAdapter.clearUriList()
+        } else {
+            files = chatFilesAdapter.getFiles(thread)
+            for (file in files) {
+                fileNames.add(file.name)
+
+                val fileBytes = file.readBytes()
+                val base64EncodedFileBytes = Base64.encodeToString(fileBytes, Base64.DEFAULT)
+                filesList.add(
+                    mapOf(
+                        "filename" to file.name,
+                        "file_bytes" to base64EncodedFileBytes
+                    )
+                )
+            }
+        }
+
+        // Update the thread with names of local files.
+        if (fileNames.isNotEmpty()) {
+            chatAdapter.updateThreadWithLocalFiles(thread, fileNames)
+        }
+
+        // Prepare request data.
+        val jsonRequestData = ChatRequest(
+            time = timestamp.toInt(),
+            sign = signatureHash,
+            query = userQuery,
+            history = chatAdapter.getChatHistory(thread),
+            persona = sharedPreferencesUtils.getString("ai_persona", "assistant"),
+            style = sharedPreferencesUtils.getString("ai_style", "balanced"),
+            web_search = sharedPreferencesUtils.getBoolean(
+                "ai_web_search",
+                false
+            ) && toolType == null,
+            tool = toolType,
+            custom_instructions = if (toolType == null) sharedPreferencesUtils.getString(
+                "pref_custom_instructions",
+                ""
+            ) else "",
+            stream = stream,
+            files = filesList
         )
 
-        // Prepare JSON body for API request.
-        val jsonBody = JSONObject().apply {
-            put("timestamp", timestamp)
-            put("sign", hash)
-            if (chatFilesAdapter.itemCount > 0) {
-                val filesArray = chatFilesAdapter.saveAndConvertFiles()
-                fileNames.addAll(filesArray.first)
-                chatFilesAdapter.clearUriList()
+        // Prepare json and encrypt it.
+        val json = Gson().toJson(jsonRequestData)
+        val encryptedJson = AESUtils.encrypt(json, encryptKey)
 
-                if (BuildConfig.DEBUG) {
-                    Log.d(ChatFragment::class.simpleName, "Files: ${fileNames.size}")
-                }
-
-                put("files", filesArray.second)
-            } else if (thread.filesNames.isNotEmpty()) {
-                val filesArray = chatFilesAdapter.getAndConvertFiles(thread)
-
-                put("files", filesArray.second)
-            }
-            put("requires_title", true)
-            put("query", userQuery)
-            put("history", historyArray)
-            put("persona", sharedPreferenceUtils.getString("ai_persona", "assistant"))
-            put("style", sharedPreferenceUtils.getString("ai_style", "balanced"))
-            put("web_search", webSearch)
-            if (toolType != null) {
-                put("tool", toolType)
-            }
-            put("custom_instructions", customInstructions)
+        // Get response from API.
+        if (stream) {
+            getAIResponseStream(encryptedJson, thread)
+        } else {
+            getAIResponse(encryptedJson, thread)
         }
+    }
 
-        // Update the thread with files.
-        if (fileNames.isNotEmpty()) {
-            chatAdapter.updateThreadWithFilesNames(thread, fileNames)
-        }
-
+    private fun getAIResponse(
+        jsonString: String,
+        thread: ChatThread
+    ) {
         // Send API request.
-        val apiCall = okHttpUtils.sendPostRequest(BuildConfig.apiUrl, jsonBody)
+        apiRequestCall1 = apiService.chat(jsonString)
 
-        coroutineUtils.io("apiRequest") {
-            // Execute API call and handle exceptions.
-            val response: Response?
-            try {
-                response = apiCall.execute()
-            } catch (e: IOException) {
-                coroutineUtils.main("cancelQuery") {
-                    cancelQuery(thread, networkErrorResponse)
+        // Enqueue the API call.
+        apiRequestCall1?.enqueue(object : Callback<ChatResponse> {
+            override fun onResponse(
+                call: Call<ChatResponse>,
+                response: Response<ChatResponse>
+            ) {
+                if (response.isSuccessful) {
+                    val aiResponse = response.body()?.response ?: ""
+                    val files = response.body()?.files ?: emptyList()
+
+                    activity?.runOnUiThread {
+                        // Update the thread with response.
+                        chatAdapter.updateThreadWithResponse(
+                            thread,
+                            aiResponse,
+                            files
+                        )
+                    }
+
+                    // Process chat title if it is a new chat.
+                    if (chatAdapter.itemCount == 1) {
+                        processChatTitle(thread)
+                    }
+                } else {
+                    activity?.runOnUiThread {
+                        cancelQuery(thread, unexpectedErrorResponse)
+                    }
                 }
-                return@io
-            } catch (e: Exception) {
-                coroutineUtils.main("cancelQuery") {
-                    cancelQuery(thread, unexpectedErrorResponse)
+                // Speak if it is a voice input.
+                if (thread.isVoiceInput && !thread.isCancelled) {
+                    speechUtils.speak(thread.aiContent)
                 }
-                return@io
+
+                activity?.runOnUiThread {
+                    // Hide stop button and show send button.
+                    querySpeakButton.visibility = View.VISIBLE
+                    querySendButton.visibility = View.VISIBLE
+                    queryStopButton.visibility = View.INVISIBLE
+                }
             }
 
-            var aiResponse = ""
-            var responseJson = JSONObject()
+            override fun onFailure(call: Call<ChatResponse>, t: Throwable) {
+                activity?.runOnUiThread {
+                    when (t) {
+                        is SocketTimeoutException -> {
+                            cancelQuery(thread, networkErrorResponse)
+                        }
 
-            // Check if response is successful and perform respective operations.
-            if (response.isSuccessful) {
-                responseJson = JSONObject(response.body!!.string())
-                aiResponse = responseJson.getString("response")
-            } else {
-                coroutineUtils.main("cancelQuery") {
-                    cancelQuery(thread, unexpectedErrorResponse)
+                        else -> {
+                            cancelQuery(thread, unexpectedErrorResponse)
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    private fun getAIResponseStream(
+        jsonString: String,
+        thread: ChatThread
+    ) {
+        // Build okhttp client.
+        val client = okHttpClientBuilder.build()
+
+        // Build request body.
+        val requestBody = jsonString.toRequestBody("text/plain".toMediaTypeOrNull())
+
+        // Build request.
+        val request = Request.Builder()
+            .url(BuildConfig.apiBaseUrl + "v2/chat")
+            .post(requestBody)
+            .build()
+
+        // Create EventSource listener.
+        val eventSourceListener = object : EventSourceListener() {
+            override fun onOpen(eventSource: EventSource, response: okhttp3.Response) {
+                // No operation.
+            }
+
+            override fun onEvent(
+                eventSource: EventSource,
+                id: String?,
+                type: String?,
+                data: String
+            ) {
+                // Remove the b' and the trailing ' to get the actual byte representation in string form.
+                val trimmedBase64String = data.removePrefix("b'").removeSuffix("'")
+
+                // Decode the base64 string to bytes.
+                val decodedBytes = Base64.decode(trimmedBase64String, Base64.DEFAULT)
+
+                // Convert bytes to string using UTF-8 encoding.
+                val decodedString = String(decodedBytes, Charsets.UTF_8)
+
+                // Process the JSON data.
+                val fixedLine = decodedString.replace("}{", "}\n{").split("\n")
+                fixedLine.forEach { part ->
+                    try {
+                        val jsonData = Gson().fromJson(part, ChatResponseStream::class.java)
+
+                        activity?.runOnUiThread {
+                            // Update the thread with files.
+                            jsonData.files?.let { files ->
+                                chatAdapter.updateThreadWithAIFiles(thread, files)
+                            }
+
+                            // Update the thread with response part.
+                            jsonData.chunk?.let { chunk ->
+                                chatAdapter.updateThreadWithResponsePart(thread, chunk)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        activity?.runOnUiThread {
+                            cancelQuery(thread, unexpectedErrorResponse)
+                        }
+                    }
                 }
             }
 
-            coroutineUtils.main("aiResponseUpdate") {
-                // Update the thread with AI response.
-                chatAdapter.updateThreadWithAIResponse(
-                    chatId,
-                    toolType,
-                    thread,
-                    aiResponse,
-                    responseJson
-                )
-
-                // Set the chat title.
-                val title = ChatUtils.getChatTitle(chatId)
-                setChatTitle(title)
-
-                // Scroll to the thread.
-                recyclerViewLayoutManager.scrollToPosition(chatAdapter.getThreadIndexById(thread.id))
+            override fun onClosed(eventSource: EventSource) {
+                // Process chat title if it is a new chat.
+                if (chatAdapter.itemCount == 1) {
+                    processChatTitle(thread)
+                }
 
                 // Speak if it is a voice input.
                 if (thread.isVoiceInput && !thread.isCancelled) {
@@ -496,49 +649,116 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
                 }
 
                 // Hide stop button and show send button.
-                querySpeakButton.visibility = View.VISIBLE
-                querySendButton.visibility = View.VISIBLE
-                queryStopButton.visibility = View.INVISIBLE
+                activity?.runOnUiThread {
+                    querySpeakButton.visibility = View.VISIBLE
+                    querySendButton.visibility = View.VISIBLE
+                    queryStopButton.visibility = View.INVISIBLE
+                }
+            }
+
+            override fun onFailure(
+                eventSource: EventSource,
+                t: Throwable?,
+                response: okhttp3.Response?
+            ) {
+                activity?.runOnUiThread {
+                    when (t) {
+                        is SocketTimeoutException -> {
+                            cancelQuery(thread, networkErrorResponse)
+                        }
+
+                        else -> {
+                            cancelQuery(thread, unexpectedErrorResponse)
+                        }
+                    }
+                }
             }
         }
+
+        // Create EventSource.
+        apiRequestCall2 =
+            EventSources.createFactory(client).newEventSource(request, eventSourceListener)
+    }
+
+    private fun processChatTitle(thread: ChatThread) {
+        // Initialize variables.
+        val userQuery = thread.userContent
+        val timestamp = System.currentTimeMillis() / 1000
+        val signatureHash = HashUtils.generateSignHash(
+            userQuery.take(10),
+            timestamp,
+            BuildConfig.apiKey
+        )
+
+        // Prepare request data.
+        val jsonRequestData = ChatTitleRequest(
+            query = userQuery,
+            time = timestamp.toInt(),
+            sign = signatureHash
+        )
+        val json = Gson().toJson(jsonRequestData)
+        val encryptedJson = AESUtils.encrypt(json, encryptKey)
+
+        // Send API request.
+        apiRequestCall3 = apiService.getChatTitle(encryptedJson)
+
+        // Enqueue the API call.
+        apiRequestCall3?.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(
+                call: Call<ResponseBody>,
+                response: Response<ResponseBody>
+            ) {
+                val chatTitle: String = if (response.isSuccessful) {
+                    response.body()?.string() ?: userQuery
+                } else {
+                    userQuery
+                }
+
+                activity?.runOnUiThread {
+                    // Set the chat title.
+                    ChatUtils.setChatTitle(
+                        activity as AppCompatActivity?,
+                        this@ChatFragment,
+                        chatId,
+                        toolType,
+                        chatTitle
+                    )
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                // No operation.
+            }
+        })
     }
 
     private fun cancelQuery(thread: ChatThread, cancelResponse: String) {
-        // Don't cancel when there's no pending query
-        if (!chatAdapter.hasPendingQuery(thread)) {
+        // Set pending to true if response is streaming.
+        if (apiRequestCall2 != null) {
+            thread.isPending = true
+        }
+
+        // Don't cancel when there's no pending query.
+        if (!thread.isPending) {
             return
         }
 
         // Hide stop button and show send button.
-        if (::querySpeakButton.isInitialized) {
-            querySpeakButton.visibility = View.VISIBLE
-        }
-        if (::querySendButton.isInitialized) {
-            querySendButton.visibility = View.VISIBLE
-        }
-        if (::queryStopButton.isInitialized) {
-            queryStopButton.visibility = View.INVISIBLE
-        }
+        (querySpeakButton as MaterialButton?)?.visibility = View.VISIBLE
+        (querySendButton as MaterialButton?)?.visibility = View.VISIBLE
+        (queryStopButton as MaterialButton?)?.visibility = View.INVISIBLE
 
-        // Cancel all jobs.
-        if (::coroutineUtils.isInitialized) {
-            coroutineUtils.cancelAllJobs()
-        }
+        // Cancel all calls.
+        cancelRequestCalls()
 
         // Update conversation status.
-        if (::chatAdapter.isInitialized) {
-            chatAdapter.cancelPendingQuery(thread, cancelResponse)
-        }
+        (chatAdapter as ChatAdapter?)?.cancelPendingQuery(thread, cancelResponse)
 
-        // Set the query as the chat title.
-        val title = ChatUtils.getChatTitle(chatId)
-        setChatTitle(title)
+        // Set the chat title.
+        ChatUtils.setChatTitle(activity as AppCompatActivity?, this, chatId, toolType, null)
     }
 
     private fun newConversation() {
-        // Cancel active jobs.
-        coroutineUtils.cancelAllJobs()
-
         // Cancel pending query.
         if (chatAdapter.getThreadsOfChat().isNotEmpty()) {
             val thread = chatAdapter.getThreadsOfChat().last()
@@ -547,6 +767,7 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
 
         // Change visibility of views accordingly.
         scrollViewNewChat.visibility = View.VISIBLE
+        fabArrowDown.visibility = View.GONE
         recyclerView.visibility = View.GONE
 
         // Show a toast message.
@@ -567,9 +788,6 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
     private fun deleteConversation() {
         // Don't delete conversation if there is no conversation already.
         if (chatAdapter.hasConversation()) {
-            // Cancel active jobs.
-            coroutineUtils.cancelAllJobs()
-
             // Cancel pending query.
             if (chatAdapter.getThreadsOfChat().isNotEmpty()) {
                 val thread = chatAdapter.getThreadsOfChat().last()
@@ -581,6 +799,7 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
 
             // Change visibility of views accordingly.
             scrollViewNewChat.visibility = View.VISIBLE
+            fabArrowDown.visibility = View.GONE
             recyclerView.visibility = View.GONE
 
             // Show a toast message.
@@ -606,6 +825,15 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
         }
     }
 
+    private fun cancelRequestCalls() {
+        apiRequestCall1?.cancel()
+        apiRequestCall2?.cancel()
+        apiRequestCall3?.cancel()
+        apiRequestCall1 = null
+        apiRequestCall2 = null
+        apiRequestCall3 = null
+    }
+
     private fun getVoiceInput() {
         // Create a VoiceInputFragment instance and show it.
         val voiceInputFragment = VoiceInputFragment(navController)
@@ -617,36 +845,5 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
                 onDestinationChanged(navController, navController.currentDestination!!, null)
             }
         })
-    }
-
-    override fun onDestinationChanged(
-        controller: NavController,
-        destination: NavDestination,
-        arguments: Bundle?
-    ) {
-        val handle = controller.currentBackStackEntry?.savedStateHandle
-        val data = handle?.get<String?>("data") ?: return
-        handle.remove<String?>("data")
-        queryInputBox.setText(data)
-        processUserQuery(true)
-    }
-
-    private fun setChatTitle(title: String) {
-        if (activity != null) {
-            val navHostFragment = requireActivity()
-                .supportFragmentManager
-                .findFragmentById(com.looper.android.support.R.id.fragment_container_view_content_main) as NavHostFragment
-
-            // Set title on the navigation drawer.
-            (activity as MainActivity).setDrawerFragmentTitle(
-                R.id.fragment_chat,
-                title
-            )
-
-            // Set title to action bar if the current fragment is being shown.
-            if (navHostFragment.childFragmentManager.primaryNavigationFragment == this) {
-                (activity as AppCompatActivity).supportActionBar?.title = title
-            }
-        }
     }
 }

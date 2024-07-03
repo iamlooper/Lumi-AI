@@ -17,7 +17,7 @@
         tools:ignore="SpeakableTextPresentCheck">
 
         <ImageView
-            android:id="@+id/image_vic"
+            android:id="@+id/image_lumi_ai"
             android:layout_width="128dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -40,18 +40,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/layout_padding_consumer"
-        android:layout_width="match_parent"
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_arrow_down"
+        style="?attr/floatingActionButtonSmallStyle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="UselessLeaf" />
+        android:layout_margin="@dimen/dp_large"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/recycler_view_chat"
+        app:layout_constraintEnd_toEndOf="@+id/recycler_view_chat"
+        app:srcCompat="@drawable/ic_keyboard_arrow_down"
+        tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
     <LinearLayout
         android:id="@+id/layout_footer"
@@ -113,7 +112,7 @@
                     android:paddingStart="0dp"
                     android:paddingEnd="16dp"
                     android:scrollbars="vertical"
-                    tools:ignore="TextContrastCheck" />
+                    tools:ignore="TextContrastCheck,VisualLintTextFieldSize" />
 
                 <Button
                     android:id="@+id/button_speak"
@@ -149,9 +148,9 @@
             <Button
                 android:id="@+id/button_stop_query"
                 style="?attr/materialIconButtonFilledTonalStyle"
-                android:backgroundTint="?colorErrorContainer"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
+                android:backgroundTint="?colorErrorContainer"
                 android:visibility="gone"
                 app:icon="@drawable/ic_stop"
                 app:iconGravity="textEnd"
@@ -160,5 +159,18 @@
         </FrameLayout>
 
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_padding_consumer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="UselessLeaf" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

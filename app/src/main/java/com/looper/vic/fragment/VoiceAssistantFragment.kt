@@ -11,31 +11,29 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import com.google.android.material.button.MaterialButton
 import android.widget.TextView
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.eyalbira.loadingdots.LoadingDots
 import com.looper.vic.R
 import java.util.Locale
 
-
-/**
- * A simple [Fragment] subclass.
- * Use the [VoiceAssistantFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class VoiceAssistantFragment : Fragment() {
+class VoiceAssistantFragment : Fragment(), RecognitionListener, MenuProvider {
+    private val speechRecognizerIntent: Intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+    private var lastRecognition: ArrayList<String>? = null
+    private var isRecording = false
     private lateinit var navController: NavController
-    private lateinit var startSpeakButton: Button
-    private lateinit var endSpeakButton: Button
-    private lateinit var sendSpeakButton: Button
+    private lateinit var startSpeakButton: MaterialButton
+    private lateinit var endSpeakButton: MaterialButton
+    private lateinit var sendSpeakButton: MaterialButton
     private lateinit var speakOutputTextView: TextView
     private lateinit var speechRecognizer: SpeechRecognizer
     private lateinit var waveformSeekBar: LoadingDots
-    private val speechRecognizerIntent: Intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-    private var lastRecognition: ArrayList<String>? = null
 
     init {
         speechRecognizerIntent.putExtra(
@@ -44,66 +42,37 @@ class VoiceAssistantFragment : Fragment() {
         speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
     }
 
-    private var isRecording = false
+    override fun onDestroyView() {
+        speechRecognizer.destroy()
+
+        super.onDestroyView()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_voice_assistant, container, false)
-    }
-
-    override fun onDestroyView() {
-        speechRecognizer.destroy()
-        super.onDestroyView()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        @Suppress("DEPRECATION")
-        setHasOptionsMenu(true)
+        // Setup MenuProvider.
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
 
-        // Initialize variables and views.
+        // Initialize variables.
         navController = view.findNavController()
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
-        speechRecognizer.setRecognitionListener(object : RecognitionListener {
-            override fun onReadyForSpeech(bundle: Bundle) {}
-
-            override fun onBeginningOfSpeech() {
-                waveformSeekBar.startAnimation()
-                isRecording = true
-                setSpeakButtonStyle()
-            }
-
-            override fun onRmsChanged(v: Float) {}
-
-            override fun onBufferReceived(bytes: ByteArray) {}
-
-            override fun onEndOfSpeech() {}
-
-            override fun onError(i: Int) {}
-
-            override fun onResults(bundle: Bundle) {
-                waveformSeekBar.stopAnimation()
-                lastRecognition = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                speakOutputTextView.text = lastRecognition?.first() ?: ""
-                isRecording = false
-                setSpeakButtonStyle()
-            }
-
-            override fun onPartialResults(bundle: Bundle) {}
-
-            override fun onEvent(i: Int, bundle: Bundle) {}
-        })
-
-        // Find views by their IDs.
         startSpeakButton = view.findViewById(R.id.button_start_speak)
         endSpeakButton = view.findViewById(R.id.button_end_speak)
         sendSpeakButton = view.findViewById(R.id.button_send_speak_result)
         speakOutputTextView = view.findViewById(R.id.text_speak_result)
         waveformSeekBar = view.findViewById(R.id.waveform_seek_bar)
+
+        // Set speech recognizer.
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
+        speechRecognizer.setRecognitionListener(this)
 
         // Set onClickListener for buttons.
         startSpeakButton.setOnClickListener {
@@ -116,6 +85,49 @@ class VoiceAssistantFragment : Fragment() {
 
         sendSpeakButton.setOnClickListener {
             sendResult()
+        }
+    }
+
+    override fun onReadyForSpeech(bundle: Bundle) {}
+
+    override fun onBeginningOfSpeech() {
+        waveformSeekBar.startAnimation()
+        isRecording = true
+        setSpeakButtonStyle()
+    }
+
+    override fun onRmsChanged(v: Float) {}
+
+    override fun onBufferReceived(bytes: ByteArray) {}
+
+    override fun onEndOfSpeech() {}
+
+    override fun onError(i: Int) {}
+
+    override fun onResults(bundle: Bundle) {
+        waveformSeekBar.stopAnimation()
+        lastRecognition = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+        speakOutputTextView.text = lastRecognition?.first() ?: ""
+        isRecording = false
+        setSpeakButtonStyle()
+    }
+
+    override fun onPartialResults(bundle: Bundle) {}
+
+    override fun onEvent(i: Int, bundle: Bundle) {}
+
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.fragment_voice_assistant_menu, menu)
+    }
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        return when (menuItem.itemId) {
+            R.id.chat_close -> {
+                navController.popBackStack()
+                true
+            }
+
+            else -> false
         }
     }
 
@@ -144,36 +156,9 @@ class VoiceAssistantFragment : Fragment() {
 
     private fun sendResult() {
         navController.previousBackStackEntry?.savedStateHandle?.set(
-            "data",
+            "voice_text",
             lastRecognition?.first()
         )
         navController.popBackStack()
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance() = VoiceAssistantFragment()
-    }
-
-    @Suppress("DEPRECATION")
-    @Deprecated("Deprecated in Java")
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        inflater.inflate(R.menu.fragment_voice_assistant_menu, menu)
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    @Suppress("DEPRECATION")
-    @Deprecated("Deprecated in Java")
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle menu item selection.
-        return when (item.itemId) {
-            R.id.chat_close -> {
-                navController.popBackStack()
-                true
-            }
-
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 }

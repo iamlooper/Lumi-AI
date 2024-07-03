@@ -11,6 +11,7 @@ buildscript {
         classpath(libs.gradle)
         classpath(libs.kotlin.gradle.plugin)
         classpath(libs.google.secrets.gradle.plugin)
+        classpath(libs.androidx.room.gradle.plugin)
     }
 }
 
@@ -22,6 +23,10 @@ allprojects {
             url = uri("https://jitpack.io")
         }        
     }
+}
+
+plugins {
+    id("com.google.devtools.ksp") version "1.9.22-1.0.17" apply false
 }
 
 tasks.register<Delete>("clean") {

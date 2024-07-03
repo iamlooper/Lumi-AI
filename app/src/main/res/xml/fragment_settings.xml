@@ -1,31 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:key="settings_ai"
         android:title="@string/settings_ai">
 
         <ListPreference
-            android:key="ai_style"
+            android:defaultValue="balanced"
             android:entries="@array/ai_style"
             android:entryValues="@array/ai_style_value"
-            android:defaultValue="balanced"
-            android:title="@string/settings_ai_style_title"
+            android:icon="@drawable/ic_reviews"
+            android:key="ai_style"
             android:summary="@string/settings_ai_style_summary"
-            android:icon="@drawable/ic_reviews" />
+            android:title="@string/settings_ai_style_title" />
 
         <SwitchPreferenceCompat
+            android:icon="@drawable/ic_search"
             android:key="ai_web_search"
-            android:title="@string/settings_ai_web_search_title"
             android:summary="@string/settings_ai_web_search_summary"
-            android:icon="@drawable/ic_search" />
+            android:title="@string/settings_ai_web_search_title" />
 
         <EditTextPreference
+            android:icon="@drawable/ic_notes"
             android:key="pref_custom_instructions"
-            android:title="@string/pref_custom_instructions_title"
             android:summary="@string/pref_custom_instructions_summary"
-            android:icon="@drawable/ic_notes" />
+            android:title="@string/pref_custom_instructions_title" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:icon="@drawable/ic_airwave"
+            android:key="pref_streaming_response"
+            android:title="@string/pref_streaming_response_title" />
 
     </PreferenceCategory>
 
-</androidx.preference.PreferenceScreen>
+</PreferenceScreen>

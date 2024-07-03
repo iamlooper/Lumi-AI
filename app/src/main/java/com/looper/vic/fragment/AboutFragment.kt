@@ -1,6 +1,5 @@
 package com.looper.vic.fragment
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,29 +13,21 @@ import com.looper.android.support.util.AppUtils
 import com.looper.android.support.util.IntentUtils
 import com.looper.vic.R
 
-/**
- * A simple [Fragment] subclass.
- * Use the [AboutFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class AboutFragment : Fragment() {
-    private lateinit var context: Context
     private lateinit var navController: NavController
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        // Inflate the layout for this fragment
+    ): View? {
         return inflater.inflate(R.layout.fragment_about, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize variables and views.
-        context = requireContext()
+        // Initialize variables.
         navController = view.findNavController()
 
         // Set up version number.
@@ -68,10 +59,5 @@ class AboutFragment : Fragment() {
                 "https://github.com/iamlooper/Lumi-AI/tree/main#licenses-"
             )
         }
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance() = AboutFragment()
     }
 }

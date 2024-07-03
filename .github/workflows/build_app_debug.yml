@@ -14,8 +14,9 @@ jobs:
         
       - name: Add necessary properties into the local.properties
         run: |
-          echo "apiUrl=${{ secrets.API_URL }}" >> local.properties
-          echo "apiSecretKey=${{ secrets.API_SECRET_KEY }}" >> local.properties
+          echo "apiBaseUrl=${{ secrets.API_BASE_URL }}" >> local.properties
+          echo "apiKey=${{ secrets.API_KEY }}" >> local.properties
+          echo "encryptBase64Key=${{ secrets.ENCRYPT_BASE64_KEY }}" >> local.properties
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3

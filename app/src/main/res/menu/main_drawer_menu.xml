@@ -16,7 +16,7 @@
 
         <item
             android:id="@+id/fragment_tools"
-            android:icon="@drawable/ic_activity"
+            android:icon="@drawable/ic_home_repair_service"
             android:title="@string/title_tools" />
 
         <item

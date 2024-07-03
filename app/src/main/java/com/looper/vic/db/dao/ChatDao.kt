@@ -44,11 +44,11 @@ interface ChatDao {
     fun updateChat(chat: Chat)
 
     @Delete(ChatThread::class)
-    fun deleteThreadSQL(thread: ChatThread)
+    fun deleteThread(thread: ChatThread)
 
     @Delete(Chat::class)
     fun deleteChat(chat: Chat)
 
     @Query("DELETE FROM chatthread WHERE chat_id = :chatId")
-    fun deleteAllThreadsOfChatSQL(chatId: Int)
+    fun deleteAllThreadsOfChat(chatId: Int)
 }

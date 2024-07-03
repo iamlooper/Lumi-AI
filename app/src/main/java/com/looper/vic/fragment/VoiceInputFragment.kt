@@ -17,7 +17,16 @@ open class VoiceInputFragment(private var navController: NavController) :
 
     override fun onDestroyView() {
         speechUtils.destroy()
+
         super.onDestroyView()
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_voice_input_bottom_sheet, container, false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,12 +35,6 @@ open class VoiceInputFragment(private var navController: NavController) :
         // Initialize SpeechUtils.
         speechUtils = SpeechUtils(requireContext())
     }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_voice_input_bottom_sheet, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -57,7 +60,7 @@ open class VoiceInputFragment(private var navController: NavController) :
 
     override fun onResults(results: Bundle?) {
         val recognition = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-        navController.currentBackStackEntry?.savedStateHandle?.set("data", recognition?.first())
+        navController.currentBackStackEntry?.savedStateHandle?.set("voice_text", recognition?.first())
         dismiss()
     }
 

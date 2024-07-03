@@ -7,6 +7,6 @@
         android:icon="@drawable/ic_search"
         android:title="@string/search_chat"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
-        app:showAsAction="ifRoom|collapseActionView" />
+        app:showAsAction="always|collapseActionView" />
 
 </menu>

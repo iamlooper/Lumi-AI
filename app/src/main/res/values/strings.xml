@@ -37,6 +37,10 @@
     <string name="network_error_response">Network error. Please try again later.</string>
     <string name="unexpected_error_response">Unexpected error. Please try again later.</string>
 
+    <string name="file_empty">File (%s) is empty</string>
+    <string name="file_exceeds_size_limit">File (%s) exceeds the size limit of %s</string>
+    <string name="file_not_supported">File (%s) is not supported</string>
+
     <!-- Chats -->
     <string name="chat_history_search">Search</string>
     <string name="search_chat">Search chat</string>
@@ -55,6 +59,8 @@
     <string name="pref_custom_instructions_title">Custom instructions</string>
     <string name="pref_custom_instructions_summary">Modify the behavior of the AI</string>
     <string name="pref_custom_instructions_input_hint">Type your instructions here</string>
+
+    <string name="pref_streaming_response_title">Streaming response</string>
 
     <!-- About -->
     <string name="about_app_developed_by">Developed by <a href="https://github.com/iamlooper">Looper</a></string>

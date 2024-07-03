@@ -14,42 +14,20 @@ import com.looper.android.support.util.SpeechUtils
 import com.looper.android.support.util.SystemServiceUtils
 import com.looper.vic.MyApp
 import com.looper.vic.R
-import com.looper.vic.model.Chat
 import com.looper.vic.model.ChatThread
+import com.looper.vic.util.ChatUtils
 import com.looper.vic.util.FileUtils
 import com.looper.vic.util.MarkwonUtils
-import okhttp3.internal.filterList
-import org.json.JSONArray
-import org.json.JSONObject
-import com.looper.vic.util.ChatUtils
 
 class ChatAdapter(
     private val chatId: Int,
     private val speechUtils: SpeechUtils,
     private val onRegenerateResponse: (ChatThread) -> Unit
-) :
-    RecyclerView.Adapter<ViewHolder>() {
+): RecyclerView.Adapter<ViewHolder>() {
 
-    fun getThreadsOfChat(): List<ChatThread> {
-        val dao = MyApp.chatDao()
-        if (dao.getAllChatIds().contains(chatId)) {
-            return dao.getAllThreads(chatId)
-        }
-
-        return mutableListOf()
-    }
-
-    private fun getThreadsOfChatBeforeThread(thread: ChatThread): List<ChatThread> {
-        val dao = MyApp.chatDao()
-        if (dao.getAllChatIds().contains(chatId)) {
-            return dao.getAllThreadsBeforeThread(chatId, thread.id)
-        }
-
-        return mutableListOf()
-    }
-
-    fun getThreadIndexById(threadId: Int): Int {
-        return getThreadsOfChat().indexOfFirst { it.id == threadId }
+    companion object {
+        const val UPDATE_AI_CONTENT = 1
+        const val UPDATE_LOCAL_FILES = 2
     }
 
     override fun getItemCount() = getThreadsOfChat().size
@@ -60,30 +38,85 @@ class ChatAdapter(
         return ViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val currentThread = getThreadsOfChat()[position]
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: List<Any>) {
+        if (payloads.isNotEmpty()) {
+            val currentThread = getCurrentThread(position)
 
-        // If the thread is visible, proceed with binding data
-        holder.itemView.visibility = View.VISIBLE
+            // Initialize views.
+            val aiChat = holder.itemView.findViewById<TextView>(R.id.text_view_ai_chat)
+            val aiChatLoading = holder.itemView.findViewById<LoadingDots>(R.id.loading_dots_ai_chat)
+            val filesContainer = holder.itemView.findViewById<LinearLayout>(R.id.scroll_view_files)
+
+            for (payload in payloads) {
+                when (payload) {
+                    UPDATE_AI_CONTENT -> {
+                        val markwon = MarkwonUtils.getMarkdownParser(holder.itemView.context, aiChat.textSize)
+
+                        // If current thread is pending then show loading dots and hide AI chat else show AI chat and set AI content.
+                        if (currentThread.isPending) {
+                            aiChatLoading.visibility = View.VISIBLE
+                            aiChat.visibility = View.GONE
+                        } else {
+                            aiChatLoading.visibility = View.GONE
+                            aiChat.visibility = View.VISIBLE
+                            markwon.setMarkdown(aiChat, currentThread.aiContent)
+                        }
+                    }
+                    UPDATE_LOCAL_FILES -> {
+                        // Add local files to the container for current thread.
+                        if (!currentThread.localFiles.isNullOrEmpty()) {
+                            for (file in currentThread.localFiles) {
+                                val fileItem = LayoutInflater.from(holder.itemView.context)
+                                    .inflate(R.layout.item_chat_file_md, filesContainer, false) as ViewGroup
+                                (fileItem.layoutParams as LinearLayout.LayoutParams).leftMargin = 0
+                                fileItem.findViewById<TextView>(R.id.text_view_file_name).text = file
+                                fileItem.findViewById<TextView>(R.id.text_view_file_size).text =
+                                    FileUtils.getFileUriFromCache(holder.itemView.context, file)?.let {
+                                        FileUtils.formatFileSize(
+                                            FileUtils.getFileSize(
+                                                holder.itemView.context.contentResolver,
+                                                it
+                                            )
+                                        )
+                                    }
+                                filesContainer.addView(fileItem)
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            onBindViewHolder(holder, position)
+        }
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val currentThread = getCurrentThread(position)
+
+        // Initialize views.
         val userChat = holder.itemView.findViewById<TextView>(R.id.text_view_user_chat)
         val aiChatLoading = holder.itemView.findViewById<LoadingDots>(R.id.loading_dots_ai_chat)
         val aiChat = holder.itemView.findViewById<TextView>(R.id.text_view_ai_chat)
-
-        // Set user/ai icon background alpha
         val userIcon = holder.itemView.findViewById<AppCompatImageView>(R.id.image_view_user_icon)
         val aiIcon = holder.itemView.findViewById<AppCompatImageView>(R.id.image_view_ai_icon)
+        val filesContainer = holder.itemView.findViewById<LinearLayout>(R.id.scroll_view_files)
+
+        // Set background alpha to user and AI icon.
         userIcon.background.alpha = 0x4F
         aiIcon.background.alpha = 0x4F
 
+        // Set popup menu to user layout and chat.
         val userLayout = holder.itemView.findViewById<LinearLayout>(R.id.layout_user)
         val userPopupMenu = View.OnLongClickListener {
             val popupMenu = PopupMenu(holder.itemView.context, it)
             popupMenu.menuInflater.inflate(R.menu.fragment_chat_user_popup_menu, popupMenu.menu)
             popupMenu.setOnMenuItemClickListener { menuItem ->
+                val userContent = getCurrentThread(position).userContent
+
                 when (menuItem.itemId) {
                     R.id.copy_clipboard -> SystemServiceUtils.copyToClipboard(
                         holder.itemView.context,
-                        currentThread.userContent
+                        userContent
                     )
                 }
                 true
@@ -94,20 +127,25 @@ class ChatAdapter(
         userChat.setOnLongClickListener(userPopupMenu)
         userLayout.setOnLongClickListener(userPopupMenu)
 
+        // Set popup menu to AI layout and chat.
         val aiLayout = holder.itemView.findViewById<LinearLayout>(R.id.layout_ai)
         val aiPopupMenu = View.OnLongClickListener {
             val popupMenu = PopupMenu(holder.itemView.context, it)
             popupMenu.menuInflater.inflate(R.menu.fragment_chat_ai_popup_menu, popupMenu.menu)
 
             popupMenu.setOnMenuItemClickListener { menuItem ->
+                val cThread = getCurrentThread(position)
+                val aiContent = cThread.aiContent
+
                 when (menuItem.itemId) {
                     R.id.copy_clipboard -> SystemServiceUtils.copyToClipboard(
                         holder.itemView.context,
-                        currentThread.aiContent
+                        aiContent
                     )
 
-                    R.id.regenerate_response -> onRegenerateResponse(currentThread)
-                    R.id.speak -> speak(currentThread)
+                    R.id.regenerate_response -> onRegenerateResponse(cThread)
+
+                    R.id.speak -> speechUtils.speak(aiContent)
                 }
                 true
             }
@@ -117,13 +155,16 @@ class ChatAdapter(
         aiChat.setOnLongClickListener(aiPopupMenu)
         aiLayout.setOnLongClickListener(aiPopupMenu)
 
+        // Set voice icon if it is a voice input.
         if (currentThread.isVoiceInput) {
             userIcon.setImageResource(R.drawable.ic_wave)
         }
 
+        // Get markdown parser and set user content.
         val markwon = MarkwonUtils.getMarkdownParser(holder.itemView.context, aiChat.textSize)
         userChat.text = currentThread.userContent
 
+        // If current thread is pending then show loading dots and hide AI chat else show AI chat and set AI content.
         if (currentThread.isPending) {
             aiChatLoading.visibility = View.VISIBLE
             aiChat.visibility = View.GONE
@@ -133,11 +174,12 @@ class ChatAdapter(
             markwon.setMarkdown(aiChat, currentThread.aiContent)
         }
 
-        val filesContainer = holder.itemView.findViewById<LinearLayout>(R.id.scroll_view_files)
-        filesContainer.removeAllViews() // Clear previous files views.
+        // Clear previous views in the container.
+        filesContainer.removeAllViews()
 
-        if (currentThread.filesNames.isNotEmpty()) {
-            for (file in currentThread.filesNames) {
+        // Add local files to the container for current thread.
+        if (!currentThread.localFiles.isNullOrEmpty()) {
+            for (file in currentThread.localFiles) {
                 val fileItem = LayoutInflater.from(holder.itemView.context)
                     .inflate(R.layout.item_chat_file_md, filesContainer, false) as ViewGroup
                 (fileItem.layoutParams as LinearLayout.LayoutParams).leftMargin = 0
@@ -161,25 +203,16 @@ class ChatAdapter(
         notifyItemInserted(itemCount - 1)
     }
 
-    fun hasPendingQuery(thread: ChatThread): Boolean {
-        return thread.isPending
-    }
-
     fun hasConversation(): Boolean {
         val threads = getThreadsOfChat()
         return threads.isNotEmpty()
     }
 
-    fun getLastUserQuery(): String {
-        val threads = getThreadsOfChat()
-        return threads.last().userContent
-    }
-
     fun cancelPendingQuery(thread: ChatThread, cancelResponse: String) {
-        if (hasPendingQuery(thread)) {
+        if (thread.isPending) {
             thread.isPending = false
-            thread.aiContent = cancelResponse
             thread.isCancelled = true
+            thread.aiContent = cancelResponse
             MyApp.chatDao().updateThread(thread)
             notifyItemChanged(getThreadIndexById(thread.id))
         }
@@ -191,96 +224,96 @@ class ChatAdapter(
         notifyDataSetChanged()
     }
 
-    fun getChatHistory(thread: ChatThread): JSONArray {
-        val threads = getThreadsOfChatBeforeThread(thread).filterList { !isCancelled }
-        val conversationArray = JSONArray()
+    fun getChatHistory(thread: ChatThread): List<Map<String, Any>> {
+        val threads = getThreadsOfChatBeforeThread(thread).filter { !it.isCancelled }
+        val conversationList = mutableListOf<Map<String, Any>>()
+
         for (i in threads.indices) {
-            if (threads[i].webSearchResults.isNotEmpty()) {
-                val webSearchResultsObject1 = JSONObject()
-                    .put("role", "user")
-                    .put("content", "")
-                val webSearchResultsObject2 = JSONObject()
-                    .put("role", "ai")
-                    .put("content", threads[i].webSearchResults)
-                conversationArray.put(webSearchResultsObject1)
-                conversationArray.put(webSearchResultsObject2)
+            val userMessageObject = mutableMapOf<String, Any>(
+                "role" to "user",
+                "content" to threads[i].userContent
+            )
+
+            if (threads[i].aiFiles.isNotEmpty()) {
+                userMessageObject["files"] = threads[i].aiFiles
             }
 
-            if (threads[i].filesContents.isNotEmpty()) {
-                val filesContentsObject1 = JSONObject()
-                    .put("role", "user")
-                    .put("content", "")
-                val filesContentsObject2 = JSONObject()
-                    .put("role", "ai")
-                    .put("content", threads[i].filesContents)
-                conversationArray.put(filesContentsObject1)
-                conversationArray.put(filesContentsObject2)
-            }
+            val aiMessageObject = mapOf(
+                "role" to "ai",
+                "content" to threads[i].aiContent
+            )
 
-            val userMessageObject = JSONObject()
-                .put("role", "user")
-                .put("content", threads[i].userContent)
-            val aiMessageObject = JSONObject()
-                .put("role", "ai")
-                .put("content", threads[i].aiContent)
-
-            conversationArray.put(userMessageObject)
-            conversationArray.put(aiMessageObject)
+            conversationList.add(userMessageObject)
+            conversationList.add(aiMessageObject)
         }
-        return conversationArray
+
+        return conversationList
     }
 
-    fun updateThreadWithFilesNames(thread: ChatThread, files: List<String>) {
+    fun updateThreadWithLocalFiles(thread: ChatThread, files: List<String>) {
         if (hasConversation()) {
-            thread.filesNames = files
+            thread.localFiles = files
             MyApp.chatDao().updateThread(thread)
-            notifyItemChanged(getThreadIndexById(thread.id))
+            notifyItemChanged(getThreadIndexById(thread.id), UPDATE_LOCAL_FILES)
         }
     }
 
-    fun updateThreadWithAIResponse(
-        chatId: Int,
-        toolType: String?,
+    fun updateThreadWithAIFiles(thread: ChatThread, files: List<String> = emptyList()) {
+        if (hasConversation()) {
+            if (files.isNotEmpty()) {
+                thread.aiFiles = files
+                MyApp.chatDao().updateThread(thread)
+            }
+        }
+    }
+
+    fun updateThreadWithResponse(
         thread: ChatThread,
-        aiResponse: String,
-        responseJson: JSONObject
+        response: String,
+        files: List<String> = emptyList()
     ) {
         if (hasConversation()) {
-            if (responseJson.has("title")) {
-                val title = responseJson.getString("title")
-                var chat = MyApp.chatDao().getChat(chatId)
-                if (chat == null) {
-                    chat = Chat(
-                        chatId = chatId,
-                        chatTitle = title,
-                        tool = toolType,
-                    )
-                    MyApp.chatDao().insertChat(chat)
-                } else {
-                    chat.chatTitle = title
-                    chat.tool = toolType
-                    MyApp.chatDao().updateChat(chat)
-                }
-            }
+            // Set AI files.
+            updateThreadWithAIFiles(thread, files)
 
-            if (responseJson.has("web_search_results")) {
-                val webSearchResults = responseJson.getString("web_search_results")
-                thread.webSearchResults = webSearchResults
-            }
-
-            if (responseJson.has("files_contents")) {
-                val filesContents = responseJson.getString("files_contents")
-                thread.filesContents = filesContents
-            }
-
+            // Set AI response.
             thread.isPending = false
-            thread.aiContent = aiResponse
+            thread.aiContent = response
             MyApp.chatDao().updateThread(thread)
-            notifyItemChanged(getThreadIndexById(thread.id))
+            notifyItemChanged(getThreadIndexById(thread.id), UPDATE_AI_CONTENT)
         }
     }
 
-    private fun speak(thread: ChatThread) {
-        speechUtils.speak(thread.aiContent)
+    fun updateThreadWithResponsePart(
+        thread: ChatThread,
+        responsePart: String
+    ) {
+        if (hasConversation()) {
+            // Set AI response part.
+            thread.isPending = false
+            thread.aiContent += responsePart
+            MyApp.chatDao().updateThread(thread)
+            notifyItemChanged(getThreadIndexById(thread.id), UPDATE_AI_CONTENT)
+        }
     }
+
+    fun getThreadsOfChat(): List<ChatThread> {
+        if (MyApp.chatDao().getAllChatIds().contains(chatId)) {
+            return MyApp.chatDao().getAllThreads(chatId)
+        }
+
+        return mutableListOf()
+    }
+
+    private fun getThreadsOfChatBeforeThread(thread: ChatThread): List<ChatThread> {
+        if (MyApp.chatDao().getAllChatIds().contains(chatId)) {
+            return MyApp.chatDao().getAllThreadsBeforeThread(chatId, thread.id)
+        }
+
+        return mutableListOf()
+    }
+
+    fun getThreadIndexById(threadId: Int): Int = getThreadsOfChat().indexOfFirst { it.id == threadId }
+
+    private fun getCurrentThread(position: Int): ChatThread = getThreadsOfChat()[position]
 }

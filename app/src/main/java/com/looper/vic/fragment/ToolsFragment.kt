@@ -16,11 +16,6 @@ import com.google.android.material.chip.ChipGroup
 import com.looper.vic.R
 import com.looper.vic.adapter.ToolsAdapter
 
-/**
- * A simple [Fragment] subclass.
- * Use the [ToolsFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class ToolsFragment : Fragment() {
     private lateinit var navController: NavController
     private lateinit var toolsTypeChipGroup: ChipGroup
@@ -32,17 +27,14 @@ class ToolsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_tools, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize variables and views.
+        // Initialize variables.
         navController = view.findNavController()
-
-        // Find views by their IDs.
         toolsTypeChipGroup = view.findViewById(R.id.ai_categories_chip_group_tools)
         recyclerView = view.findViewById(R.id.recycler_view_tools)
 
@@ -86,10 +78,5 @@ class ToolsFragment : Fragment() {
             }
             toolsTypeChipGroup.addView(chip)
         }
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance() = ToolsFragment()
     }
 }
