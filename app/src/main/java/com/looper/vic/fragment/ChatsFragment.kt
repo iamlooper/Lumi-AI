@@ -143,8 +143,8 @@ class ChatsFragment : Fragment(), MenuProvider {
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
-        val chatId = item.intent.getIntExtra("chatId", -1)
-        val position = item.intent.getIntExtra("position", -1)
+        val chatId = item.intent!!.getIntExtra("chatId", -1)
+        val position = item.intent!!.getIntExtra("position", -1)
 
         return when (item.itemId) {
             R.id.edit_chat_title -> {

@@ -194,8 +194,8 @@ class ChatFragment : Fragment(), NavController.OnDestinationChangedListener, Men
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
-        val position = item.intent.getIntExtra("position", -1)
-        val viewId = item.intent.getIntExtra("viewId", -1)
+        val position = item.intent!!.getIntExtra("position", -1)
+        val viewId = item.intent!!.getIntExtra("viewId", -1)
         chatThread = chatAdapter.getCurrentThread(position)
 
         return when (item.itemId) {
@@ -236,6 +236,8 @@ class ChatFragment : Fragment(), NavController.OnDestinationChangedListener, Men
             }
 
             R.id.regenerate_response -> {
+                cancelRequestCalls()
+
                 // Make the thread pending and clear previous AI response.
                 chatThread.isPending = true
                 chatThread.isCancelled = false
