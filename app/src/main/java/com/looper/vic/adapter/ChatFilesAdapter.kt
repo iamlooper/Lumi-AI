@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
 import com.looper.vic.R
 import com.looper.vic.model.ChatThread
-import com.looper.vic.model.FileExtensions
 import com.looper.vic.util.FileUtils
 import java.io.File
 import java.io.FileOutputStream
@@ -19,7 +18,8 @@ import java.io.InputStream
 class ChatFilesAdapter(private val context: Context) :
     RecyclerView.Adapter<ViewHolder>() {
     private val fileUriList = ArrayList<Uri>()
-    private val allowedExts = FileExtensions.PHOTO + FileExtensions.DOCUMENT + FileExtensions.VIDEO + FileExtensions.AUDIO
+    private val allowedExts =
+        FileUtils.TEXT_EXTS + FileUtils.PHOTO_EXTS + FileUtils.DOCUMENT_EXTS + FileUtils.AUDIO_EXTS + FileUtils.VIDEO_EXTS
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val layout = LayoutInflater.from(parent.context)

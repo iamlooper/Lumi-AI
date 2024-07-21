@@ -1,5 +1,6 @@
 package com.looper.vic.fragment
 
+import android.Manifest
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -10,7 +11,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts.OpenMultipleDocuments
 import androidx.appcompat.app.AppCompatActivity
@@ -20,6 +20,7 @@ import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
@@ -31,6 +32,8 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
+import com.looper.android.support.util.DialogUtils
+import com.looper.android.support.util.PermissionUtils
 import com.looper.android.support.util.SharedPreferencesUtils
 import com.looper.android.support.util.SpeechUtils
 import com.looper.android.support.util.SystemServiceUtils
@@ -47,6 +50,8 @@ import com.looper.vic.model.ChatTitleRequest
 import com.looper.vic.util.AESUtils
 import com.looper.vic.util.ChatUtils
 import com.looper.vic.util.HashUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -62,7 +67,7 @@ import java.io.IOException
 import java.net.SocketTimeoutException
 import java.util.concurrent.TimeUnit
 
-open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener, MenuProvider {
+class ChatFragment : Fragment(), NavController.OnDestinationChangedListener, MenuProvider {
 
     // Declare and initialize variables.
     private val fileSelector = registerForActivityResult(OpenMultipleDocuments()) {
@@ -74,6 +79,12 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
             .readTimeout(100, TimeUnit.SECONDS)
             .writeTimeout(100, TimeUnit.SECONDS)
     private val encryptKey: ByteArray = AESUtils.keyFromString(BuildConfig.encryptBase64Key)
+    private val userCancelledResponse: String =
+        MyApp.getAppContext()!!.getString(R.string.user_cancelled_response)
+    private val networkErrorResponse: String =
+        MyApp.getAppContext()!!.getString(R.string.network_error_response)
+    private val unexpectedErrorResponse: String =
+        MyApp.getAppContext()!!.getString(R.string.unexpected_error_response)
     private var chatId: Int = -1
     private var toolType: String? = null
     private var fragmentMenu: Menu? = null
@@ -94,12 +105,8 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
     private lateinit var fabArrowDown: FloatingActionButton
     private lateinit var chatAdapter: ChatAdapter
     private lateinit var chatFilesAdapter: ChatFilesAdapter
-    private lateinit var layoutFooter: LinearLayout
-    private lateinit var paddingConsumer: LinearLayout
-    private lateinit var userCancelledResponse: String
-    private lateinit var networkErrorResponse: String
-    private lateinit var unexpectedErrorResponse: String
     private lateinit var chatThread: ChatThread
+    private lateinit var requestAudioPermission: () -> Unit
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -116,16 +123,11 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
     }
 
     override fun onDestroy() {
-        // Cancel all calls.
         cancelRequestCalls()
-
         speechUtils.destroy()
 
         if (chatAdapter.getThreadsOfChat().isNotEmpty()) {
             val thread = chatAdapter.getThreadsOfChat().last()
-            if ((userCancelledResponse as String?) == null) {
-                userCancelledResponse = requireContext().getString(R.string.user_cancelled_response)
-            }
             cancelQuery(thread, userCancelledResponse)
         }
 
@@ -141,6 +143,13 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Initialize variables.
+        requestAudioPermission = PermissionUtils.requestPermission(
+            activity = (requireActivity() as AppCompatActivity),
+            context = requireContext(),
+            permission = Manifest.permission.RECORD_AUDIO,
+            onPermissionGranted = { getVoiceInput() }
+        )
         speechUtils = SpeechUtils(requireContext())
 
         // Determine chat id.
@@ -177,28 +186,85 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
         }
 
         // Initialize ChatAdapter.
-        chatAdapter = ChatAdapter(chatId, speechUtils) { thread ->
-            chatThread = thread
+        chatAdapter = ChatAdapter(
+            activity as AppCompatActivity,
+            chatId,
+            speechUtils
+        )
+    }
 
-            // Make the thread pending and clear previous AI response.
-            thread.isPending = true
-            thread.isCancelled = false
-            thread.aiContent = ""
-            MyApp.chatDao().updateThread(thread)
-            chatAdapter.notifyItemChanged(chatAdapter.getThreadIndexById(thread.id))
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        val position = item.intent.getIntExtra("position", -1)
+        val viewId = item.intent.getIntExtra("viewId", -1)
+        chatThread = chatAdapter.getCurrentThread(position)
 
-            // Show recycler view and scroll to the thread.
-            scrollViewNewChat.visibility = View.GONE
-            recyclerView.visibility = View.VISIBLE
-            recyclerViewLayoutManager.scrollToPosition(chatAdapter.getThreadIndexById(thread.id))
+        return when (item.itemId) {
+            R.id.copy_clipboard -> {
+                when (viewId) {
+                    R.id.layout_user -> {
+                        SystemServiceUtils.copyToClipboard(
+                            requireContext(),
+                            chatThread.userContent
+                        )
+                    }
 
-            // Show stop button.
-            querySpeakButton.visibility = View.GONE
-            querySendButton.visibility = View.INVISIBLE
-            queryStopButton.visibility = View.VISIBLE
+                    R.id.layout_ai -> {
+                        SystemServiceUtils.copyToClipboard(
+                            requireContext(),
+                            chatThread.aiContent
+                        )
+                    }
+                }
+                true
+            }
 
-            // Process AI response.
-            processAIResponse(thread)
+            R.id.select_text -> {
+                when (viewId) {
+                    R.id.layout_user -> {
+                        navController.navigate(
+                            R.id.fragment_select_text,
+                            Bundle().apply { putString("text", chatThread.userContent) })
+                    }
+
+                    R.id.layout_ai -> {
+                        navController.navigate(
+                            R.id.fragment_select_text,
+                            Bundle().apply { putString("text", chatThread.aiContent) })
+                    }
+                }
+                true
+            }
+
+            R.id.regenerate_response -> {
+                // Make the thread pending and clear previous AI response.
+                chatThread.isPending = true
+                chatThread.isCancelled = false
+                chatThread.aiContent = ""
+                MyApp.chatDao().updateThread(chatThread)
+                chatAdapter.notifyItemChanged(chatAdapter.getThreadIndexById(chatThread.id))
+
+                // Show recycler view and scroll to the thread.
+                scrollViewNewChat.visibility = View.GONE
+                recyclerView.visibility = View.VISIBLE
+                recyclerViewLayoutManager.scrollToPosition(chatAdapter.getThreadIndexById(chatThread.id))
+
+                // Show stop button.
+                querySpeakButton.visibility = View.GONE
+                querySendButton.visibility = View.INVISIBLE
+                queryStopButton.visibility = View.VISIBLE
+
+                // Process AI response.
+                processAIResponse(chatThread)
+
+                true
+            }
+
+            R.id.speak -> {
+                speechUtils.speak(chatThread.aiContent)
+                true
+            }
+
+            else -> super.onContextItemSelected(item)
         }
     }
 
@@ -210,18 +276,13 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
 
         // Set the chat title.
-        ChatUtils.setChatTitle(activity as AppCompatActivity?, this, chatId, toolType, null)
+        ChatUtils.setChatTitle(activity as AppCompatActivity?, chatId, toolType, null)
 
-        // Initialize variables and views.
+        // Initialize variables.
         navController = view.findNavController()
         navController.addOnDestinationChangedListener(this)
-        sharedPreferencesUtils = SharedPreferencesUtils.getInstance(requireContext())
+        sharedPreferencesUtils = SharedPreferencesUtils(requireContext())
         chatFilesAdapter = ChatFilesAdapter(requireContext())
-        userCancelledResponse = requireContext().getString(R.string.user_cancelled_response)
-        networkErrorResponse = requireContext().getString(R.string.network_error_response)
-        unexpectedErrorResponse = requireContext().getString(R.string.unexpected_error_response)
-
-        // Find views by their IDs.
         scrollViewNewChat = view.findViewById(R.id.scroll_view_new_chat)
         recyclerView = view.findViewById(R.id.recycler_view_chat)
         recyclerViewFiles = view.findViewById(R.id.recycler_view_chat_files)
@@ -231,8 +292,6 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
         querySpeakButton = view.findViewById(R.id.button_speak)
         queryAddFilesButton = view.findViewById(R.id.button_add_files)
         fabArrowDown = view.findViewById(R.id.fab_arrow_down)
-        layoutFooter = view.findViewById(R.id.layout_footer)
-        paddingConsumer = view.findViewById(R.id.layout_padding_consumer)
 
         // Set up RecyclerView.
         recyclerView.adapter = chatAdapter
@@ -289,7 +348,7 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
 
         queryStopButton.setOnClickListener { cancelQuery(chatThread, userCancelledResponse) }
 
-        querySpeakButton.setOnClickListener { getVoiceInput() }
+        querySpeakButton.setOnClickListener { requestAudioPermission() }
 
         queryAddFilesButton.setOnClickListener { fileSelector.launch(arrayOf("*/*")) }
 
@@ -297,18 +356,6 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
             val lastPosition = chatAdapter.itemCount - 1
             if (lastPosition >= 0) {
                 recyclerView.smoothScrollToPosition(lastPosition)
-            }
-        }
-
-        // Workaround to remove extra top padding of attribute android:fitsSystemWindows="true"
-        paddingConsumer.viewTreeObserver.addOnGlobalLayoutListener {
-            if (context != null) {
-                layoutFooter.setPadding(
-                    layoutFooter.paddingLeft,
-                    requireContext().resources.getDimensionPixelSize(com.looper.android.support.R.dimen.dp_medium),
-                    layoutFooter.paddingRight,
-                    paddingConsumer.paddingBottom
-                )
             }
         }
     }
@@ -319,6 +366,7 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
         if (chatAdapter.hasConversation()) {
             // Show menu items.
             fragmentMenu?.findItem(R.id.new_chat)?.isVisible = true
+            fragmentMenu?.findItem(R.id.edit_chat_title)?.isVisible = true
             fragmentMenu?.findItem(R.id.delete_chat)?.isVisible = true
 
             // Show recycler view.
@@ -326,12 +374,13 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
             recyclerView.visibility = View.VISIBLE
 
             // Set the chat title as it resets.
-            ChatUtils.setChatTitle(activity as AppCompatActivity?, this, chatId, toolType, null)
+            ChatUtils.setChatTitle(activity as AppCompatActivity?, chatId, toolType, null)
         }
 
         if (toolType != null) {
             // Show menu items if there is a tool is selected.
             fragmentMenu?.findItem(R.id.new_chat)?.isVisible = true
+            fragmentMenu?.findItem(R.id.edit_chat_title)?.isVisible = true
             fragmentMenu?.findItem(R.id.delete_chat)?.isVisible = true
         }
     }
@@ -354,6 +403,7 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
         // Show menu items if there is a conversation or a tool is selected.
         if (chatAdapter.hasConversation() || toolType != null) {
             menu.findItem(R.id.new_chat)?.isVisible = true
+            menu.findItem(R.id.edit_chat_title)?.isVisible = true
             menu.findItem(R.id.delete_chat)?.isVisible = true
         }
 
@@ -365,6 +415,11 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
         return when (menuItem.itemId) {
             R.id.delete_chat -> {
                 deleteConversation()
+                true
+            }
+
+            R.id.edit_chat_title -> {
+                displayEditChatTitleDialog()
                 true
             }
 
@@ -414,6 +469,7 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
             // Show menu items if there is a conversation.
             if (chatAdapter.hasConversation()) {
                 fragmentMenu?.findItem(R.id.new_chat)?.isVisible = true
+                fragmentMenu?.findItem(R.id.edit_chat_title)?.isVisible = true
                 fragmentMenu?.findItem(R.id.delete_chat)?.isVisible = true
             }
 
@@ -478,17 +534,17 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
             sign = signatureHash,
             query = userQuery,
             history = chatAdapter.getChatHistory(thread),
-            persona = sharedPreferencesUtils.getString("ai_persona", "assistant"),
-            style = sharedPreferencesUtils.getString("ai_style", "balanced"),
-            web_search = sharedPreferencesUtils.getBoolean(
+            persona = sharedPreferencesUtils.get("ai_persona", "assistant"),
+            style = sharedPreferencesUtils.get("ai_style", "balanced"),
+            web_search = sharedPreferencesUtils.get(
                 "ai_web_search",
                 false
-            ) && toolType == null,
+            ),
             tool = toolType,
-            custom_instructions = if (toolType == null) sharedPreferencesUtils.getString(
+            custom_instructions = sharedPreferencesUtils.get(
                 "pref_custom_instructions",
                 ""
-            ) else "",
+            ),
             stream = true,
             files = filesList
         )
@@ -571,7 +627,9 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
 
                 // Speak if it is a voice input.
                 if (thread.isVoiceInput && !thread.isCancelled) {
-                    speechUtils.speak(thread.aiContent)
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        speechUtils.speak(thread.aiContent)
+                    }
                 }
 
                 // Hide stop button and show send button.
@@ -656,7 +714,6 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
                     // Set the chat title.
                     ChatUtils.setChatTitle(
                         activity as AppCompatActivity?,
-                        this@ChatFragment,
                         chatId,
                         toolType,
                         chatTitle
@@ -672,7 +729,7 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
 
     private fun cancelQuery(thread: ChatThread, cancelResponse: String) {
         // Set pending to true if response is streaming.
-        if (apiRequestCall2 != null) {
+        if (apiRequestCall1 != null) {
             thread.isPending = true
         }
 
@@ -693,7 +750,7 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
         (chatAdapter as ChatAdapter?)?.cancelPendingQuery(thread, cancelResponse)
 
         // Set the chat title.
-        ChatUtils.setChatTitle(activity as AppCompatActivity?, this, chatId, toolType, null)
+        ChatUtils.setChatTitle(activity as AppCompatActivity?, chatId, toolType, null)
     }
 
     private fun newConversation() {
@@ -726,32 +783,38 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
     private fun deleteConversation() {
         // Don't delete conversation if there is no conversation already.
         if (chatAdapter.hasConversation()) {
-            // Cancel pending query.
-            if (chatAdapter.getThreadsOfChat().isNotEmpty()) {
-                val thread = chatAdapter.getThreadsOfChat().last()
-                chatAdapter.cancelPendingQuery(thread, userCancelledResponse)
-            }
+            DialogUtils.displayActionConfirmDialog(
+                context = requireContext(),
+                title = getString(R.string.delete_chat),
+                onPositiveAction = {
+                    // Cancel pending query.
+                    if (chatAdapter.getThreadsOfChat().isNotEmpty()) {
+                        val thread = chatAdapter.getThreadsOfChat().last()
+                        chatAdapter.cancelPendingQuery(thread, userCancelledResponse)
+                    }
 
-            // Delete conversation.
-            chatAdapter.deleteConversation()
+                    // Delete conversation.
+                    chatAdapter.deleteConversation()
 
-            // Change visibility of views accordingly.
-            scrollViewNewChat.visibility = View.VISIBLE
-            fabArrowDown.visibility = View.GONE
-            recyclerView.visibility = View.GONE
+                    // Change visibility of views accordingly.
+                    scrollViewNewChat.visibility = View.VISIBLE
+                    fabArrowDown.visibility = View.GONE
+                    recyclerView.visibility = View.GONE
 
-            // Show a toast message.
-            Toast.makeText(
-                context,
-                getString(R.string.chat_toast_delete_conversation),
-                Toast.LENGTH_SHORT
-            ).show()
+                    // Show a toast message.
+                    Toast.makeText(
+                        context,
+                        getString(R.string.chat_toast_delete_conversation),
+                        Toast.LENGTH_SHORT
+                    ).show()
 
-            // Navigate back to chat fragment.
-            navController.navigate(
-                R.id.fragment_chat, null, NavOptions.Builder()
-                    .setPopUpTo(R.id.fragment_chat, true)
-                    .build()
+                    // Navigate back to chat fragment.
+                    navController.navigate(
+                        R.id.fragment_chat, null, NavOptions.Builder()
+                            .setPopUpTo(R.id.fragment_chat, true)
+                            .build()
+                    )
+                }
             )
         } else {
             // Show a toast message.
@@ -763,6 +826,26 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
         }
     }
 
+    private fun displayEditChatTitleDialog() {
+        DialogUtils.displayEditTextDialog(
+            context = requireContext(),
+            title = getString(R.string.edit_chat_title),
+            initialInput = ChatUtils.getChatTitle(chatId, false),
+            onPositiveAction = { input ->
+                // Set the new chat title.
+                val newChatTitle = input.text.toString().trim()
+                if (newChatTitle.isNotEmpty()) {
+                    ChatUtils.setChatTitle(
+                        activity as AppCompatActivity?,
+                        chatId,
+                        toolType,
+                        newChatTitle
+                    )
+                }
+            }
+        )
+    }
+
     private fun cancelRequestCalls() {
         apiRequestCall1?.cancel()
         apiRequestCall2?.cancel()
@@ -772,7 +855,7 @@ open class ChatFragment : Fragment(), NavController.OnDestinationChangedListener
 
     private fun getVoiceInput() {
         // Create a VoiceInputFragment instance and show it.
-        val voiceInputFragment = VoiceInputFragment(navController)
+        val voiceInputFragment = VoiceInputFragment()
         voiceInputFragment.show(parentFragmentManager, VoiceInputFragment.TAG)
 
         // Observe the lifecycle of the VoiceInputFragment.

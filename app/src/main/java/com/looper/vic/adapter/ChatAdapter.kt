@@ -1,17 +1,20 @@
 package com.looper.vic.adapter
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.view.LayoutInflater
+import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
-import androidx.appcompat.widget.PopupMenu
+import androidx.core.view.forEach
 import androidx.recyclerview.widget.RecyclerView
 import com.eyalbira.loadingdots.LoadingDots
+import com.google.android.material.textview.MaterialTextView
 import com.looper.android.support.util.SpeechUtils
-import com.looper.android.support.util.SystemServiceUtils
 import com.looper.vic.MyApp
 import com.looper.vic.R
 import com.looper.vic.model.ChatThread
@@ -20,10 +23,10 @@ import com.looper.vic.util.FileUtils
 import com.looper.vic.util.MarkwonUtils
 
 class ChatAdapter(
+    private val activity: AppCompatActivity,
     private val chatId: Int,
-    private val speechUtils: SpeechUtils,
-    private val onRegenerateResponse: (ChatThread) -> Unit
-): RecyclerView.Adapter<ViewHolder>() {
+    private val speechUtils: SpeechUtils
+) : RecyclerView.Adapter<ViewHolder>() {
 
     companion object {
         const val UPDATE_AI_CONTENT = 1
@@ -43,14 +46,15 @@ class ChatAdapter(
             val currentThread = getCurrentThread(position)
 
             // Initialize views.
-            val aiChat = holder.itemView.findViewById<TextView>(R.id.text_view_ai_chat)
-            val aiChatLoading = holder.itemView.findViewById<LoadingDots>(R.id.loading_dots_ai_chat)
-            val filesContainer = holder.itemView.findViewById<LinearLayout>(R.id.scroll_view_files)
+            val aiChat: MaterialTextView = holder.itemView.findViewById(R.id.text_view_ai_chat)
+            val aiChatLoading: LoadingDots = holder.itemView.findViewById(R.id.loading_dots_ai_chat)
+            val filesContainer: LinearLayout = holder.itemView.findViewById(R.id.scroll_view_files)
 
             for (payload in payloads) {
                 when (payload) {
                     UPDATE_AI_CONTENT -> {
-                        val markwon = MarkwonUtils.getMarkdownParser(holder.itemView.context, aiChat.textSize)
+                        val markwon =
+                            MarkwonUtils.getMarkdownParser(holder.itemView.context, aiChat.textSize)
 
                         // If current thread is pending then show loading dots and hide AI chat else show AI chat and set AI content.
                         if (currentThread.isPending) {
@@ -62,23 +66,30 @@ class ChatAdapter(
                             markwon.setMarkdown(aiChat, currentThread.aiContent)
                         }
                     }
+
                     UPDATE_LOCAL_FILES -> {
                         // Add local files to the container for current thread.
                         if (!currentThread.localFiles.isNullOrEmpty()) {
                             for (file in currentThread.localFiles) {
                                 val fileItem = LayoutInflater.from(holder.itemView.context)
-                                    .inflate(R.layout.item_chat_file_md, filesContainer, false) as ViewGroup
+                                    .inflate(
+                                        R.layout.item_chat_file_md,
+                                        filesContainer,
+                                        false
+                                    ) as ViewGroup
                                 (fileItem.layoutParams as LinearLayout.LayoutParams).leftMargin = 0
-                                fileItem.findViewById<TextView>(R.id.text_view_file_name).text = file
+                                fileItem.findViewById<TextView>(R.id.text_view_file_name).text =
+                                    file
                                 fileItem.findViewById<TextView>(R.id.text_view_file_size).text =
-                                    FileUtils.getFileUriFromCache(holder.itemView.context, file)?.let {
-                                        FileUtils.formatFileSize(
-                                            FileUtils.getFileSize(
-                                                holder.itemView.context.contentResolver,
-                                                it
+                                    FileUtils.getFileUriFromCache(holder.itemView.context, file)
+                                        ?.let {
+                                            FileUtils.formatFileSize(
+                                                FileUtils.getFileSize(
+                                                    holder.itemView.context.contentResolver,
+                                                    it
+                                                )
                                             )
-                                        )
-                                    }
+                                        }
                                 filesContainer.addView(fileItem)
                             }
                         }
@@ -94,70 +105,39 @@ class ChatAdapter(
         val currentThread = getCurrentThread(position)
 
         // Initialize views.
-        val userChat = holder.itemView.findViewById<TextView>(R.id.text_view_user_chat)
-        val aiChatLoading = holder.itemView.findViewById<LoadingDots>(R.id.loading_dots_ai_chat)
-        val aiChat = holder.itemView.findViewById<TextView>(R.id.text_view_ai_chat)
-        val userIcon = holder.itemView.findViewById<AppCompatImageView>(R.id.image_view_user_icon)
-        val aiIcon = holder.itemView.findViewById<AppCompatImageView>(R.id.image_view_ai_icon)
-        val filesContainer = holder.itemView.findViewById<LinearLayout>(R.id.scroll_view_files)
+        val userChat: MaterialTextView = holder.itemView.findViewById(R.id.text_view_user_chat)
+        val userLayout: LinearLayout = holder.itemView.findViewById(R.id.layout_user)
+        val aiChatLoading: LoadingDots = holder.itemView.findViewById(R.id.loading_dots_ai_chat)
+        val aiChat: MaterialTextView = holder.itemView.findViewById(R.id.text_view_ai_chat)
+        val aiLayout: LinearLayout = holder.itemView.findViewById(R.id.layout_ai)
+        val userIcon: AppCompatImageView = holder.itemView.findViewById(R.id.image_view_user_icon)
+        val aiIcon: AppCompatImageView = holder.itemView.findViewById(R.id.image_view_ai_icon)
+        val filesContainer: LinearLayout = holder.itemView.findViewById(R.id.scroll_view_files)
 
         // Set background alpha to user and AI icon.
         userIcon.background.alpha = 0x4F
         aiIcon.background.alpha = 0x4F
 
-        // Set popup menu to user layout and chat.
-        val userLayout = holder.itemView.findViewById<LinearLayout>(R.id.layout_user)
-        val userPopupMenu = View.OnLongClickListener {
-            val popupMenu = PopupMenu(holder.itemView.context, it)
-            popupMenu.menuInflater.inflate(R.menu.fragment_chat_user_popup_menu, popupMenu.menu)
-            popupMenu.setOnMenuItemClickListener { menuItem ->
-                val userContent = getCurrentThread(position).userContent
-
-                when (menuItem.itemId) {
-                    R.id.copy_clipboard -> SystemServiceUtils.copyToClipboard(
-                        holder.itemView.context,
-                        userContent
-                    )
+        // Setup context menu for user and ai layout.
+        userLayout.setOnCreateContextMenuListener { menu, view, _ ->
+            val inflater: MenuInflater = activity.menuInflater
+            inflater.inflate(R.menu.fragment_chat_user_popup_menu, menu)
+            menu?.forEach {
+                it.intent = Intent().apply {
+                    putExtra("position", position)
+                    putExtra("viewId", view.id)
                 }
-                true
             }
-            popupMenu.show()
-            true
         }
-        userChat.setOnLongClickListener(userPopupMenu)
-        userLayout.setOnLongClickListener(userPopupMenu)
-
-        // Set popup menu to AI layout and chat.
-        val aiLayout = holder.itemView.findViewById<LinearLayout>(R.id.layout_ai)
-        val aiPopupMenu = View.OnLongClickListener {
-            val popupMenu = PopupMenu(holder.itemView.context, it)
-            popupMenu.menuInflater.inflate(R.menu.fragment_chat_ai_popup_menu, popupMenu.menu)
-
-            popupMenu.setOnMenuItemClickListener { menuItem ->
-                val cThread = getCurrentThread(position)
-                val aiContent = cThread.aiContent
-
-                when (menuItem.itemId) {
-                    R.id.copy_clipboard -> SystemServiceUtils.copyToClipboard(
-                        holder.itemView.context,
-                        aiContent
-                    )
-
-                    R.id.regenerate_response -> onRegenerateResponse(cThread)
-
-                    R.id.speak -> speechUtils.speak(aiContent)
+        aiLayout.setOnCreateContextMenuListener { menu, view, _ ->
+            val inflater: MenuInflater = activity.menuInflater
+            inflater.inflate(R.menu.fragment_chat_ai_popup_menu, menu)
+            menu?.forEach {
+                it.intent = Intent().apply {
+                    putExtra("position", position)
+                    putExtra("viewId", view.id)
                 }
-                true
             }
-            popupMenu.show()
-            true
-        }
-        aiChat.setOnLongClickListener(aiPopupMenu)
-        aiLayout.setOnLongClickListener(aiPopupMenu)
-
-        // Set voice icon if it is a voice input.
-        if (currentThread.isVoiceInput) {
-            userIcon.setImageResource(R.drawable.ic_wave)
         }
 
         // Get markdown parser and set user content.
@@ -313,7 +293,8 @@ class ChatAdapter(
         return mutableListOf()
     }
 
-    fun getThreadIndexById(threadId: Int): Int = getThreadsOfChat().indexOfFirst { it.id == threadId }
+    fun getThreadIndexById(threadId: Int): Int =
+        getThreadsOfChat().indexOfFirst { it.id == threadId }
 
-    private fun getCurrentThread(position: Int): ChatThread = getThreadsOfChat()[position]
+    fun getCurrentThread(position: Int): ChatThread = getThreadsOfChat()[position]
 }

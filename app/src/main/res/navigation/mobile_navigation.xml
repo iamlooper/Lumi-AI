@@ -40,4 +40,14 @@
         android:label="@string/title_voice_assistant"
         tools:layout="@layout/fragment_voice_assistant" />
 
+    <fragment
+        android:id="@+id/fragment_select_text"
+        android:name="com.looper.vic.fragment.SelectTextFragment"
+        android:label="@string/select_text"
+        tools:layout="@layout/fragment_select_text">
+        <argument
+            android:name="responseText"
+            app:argType="string" />
+    </fragment>
+
 </navigation>

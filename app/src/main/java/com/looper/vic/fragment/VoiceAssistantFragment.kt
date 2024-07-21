@@ -11,8 +11,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import com.google.android.material.button.MaterialButton
-import android.widget.TextView
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -20,6 +18,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.eyalbira.loadingdots.LoadingDots
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textview.MaterialTextView
 import com.looper.vic.R
 import java.util.Locale
 
@@ -31,7 +31,7 @@ class VoiceAssistantFragment : Fragment(), RecognitionListener, MenuProvider {
     private lateinit var startSpeakButton: MaterialButton
     private lateinit var endSpeakButton: MaterialButton
     private lateinit var sendSpeakButton: MaterialButton
-    private lateinit var speakOutputTextView: TextView
+    private lateinit var speakOutputTextView: MaterialTextView
     private lateinit var speechRecognizer: SpeechRecognizer
     private lateinit var waveformSeekBar: LoadingDots
 

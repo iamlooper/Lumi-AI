@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="bottom"
+    android:orientation="vertical"
+    android:theme="@style/ThemeOverlay.AppCompat.DayNight">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginVertical="24dp"
+        android:layout_marginStart="32dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/app_name"
+        android:paddingTop="8dp"
+        android:scaleType="fitCenter"
+        app:srcCompat="@drawable/lumi_ai_logo"
+        app:strokeWidth="0dp"
+        app:tint="?colorPrimary" />
+
+</LinearLayout>

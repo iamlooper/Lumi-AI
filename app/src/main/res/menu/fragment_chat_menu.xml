@@ -12,6 +12,12 @@
         tools:ignore="AlwaysShowAction" />
 
     <item
+        android:id="@+id/edit_chat_title"
+        android:title="@string/edit"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/delete_chat"
         android:title="@string/chat_delete"
         android:visible="false"

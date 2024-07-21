@@ -19,10 +19,10 @@ android {
 
     defaultConfig {
         applicationId = "com.looper.vic"
-        minSdk = 27
+        minSdk = 24
         targetSdk = 34
-        versionCode = 39
-        versionName = "2.1.0-beta-" + getCurrentDate()
+        versionCode = 40
+        versionName = "2.1.0"
 
         vectorDrawables.useSupportLibrary = true
     }
@@ -69,9 +69,7 @@ dependencies {
     implementation(libs.androidx.navigation.fragment)
     implementation(libs.androidx.navigation.ui)
     implementation(libs.androidx.preference)
-    
     implementation(libs.google.material)
-
     implementation(libs.noties.markwon.core)
     implementation(libs.noties.markwon.linkify)
     implementation(libs.noties.markwon.ext.latex)
@@ -80,19 +78,13 @@ dependencies {
     implementation(libs.noties.markwon.ext.tasklist)
     implementation(libs.noties.markwon.image)
     implementation(libs.noties.markwon.image.glide)
-
     implementation(libs.saket.better.link.movement.method)
-
     implementation(libs.squareup.okhttp)
     implementation(libs.squareup.okhttp.sse)
-
     implementation(libs.androidx.room.runtime)
     annotationProcessor(libs.androidx.room.compiler)
     ksp(libs.androidx.room.compiler)
-
     implementation(libs.google.code.gson)
-
     implementation(libs.looper.android.support)
-
     implementation(project(":loading-dots"))
 }

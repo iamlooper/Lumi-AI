@@ -7,13 +7,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.looper.android.support.util.SpeechUtils
 import com.looper.vic.R
 
-open class VoiceInputFragment(private var navController: NavController) :
+class VoiceInputFragment :
     BottomSheetDialogFragment(), RecognitionListener {
     private lateinit var speechUtils: SpeechUtils
+    private lateinit var navController: NavController
 
     override fun onDestroyView() {
         speechUtils.destroy()
@@ -39,6 +41,12 @@ open class VoiceInputFragment(private var navController: NavController) :
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Find navigation controller.
+        val navHostFragment = activity
+            ?.supportFragmentManager
+            ?.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
+
         // Initiate speech recognition.
         speechUtils.initSpeechToText(this)
 
@@ -60,7 +68,10 @@ open class VoiceInputFragment(private var navController: NavController) :
 
     override fun onResults(results: Bundle?) {
         val recognition = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-        navController.currentBackStackEntry?.savedStateHandle?.set("voice_text", recognition?.first())
+        navController.currentBackStackEntry?.savedStateHandle?.set(
+            "voice_text",
+            recognition?.first()
+        )
         dismiss()
     }
 

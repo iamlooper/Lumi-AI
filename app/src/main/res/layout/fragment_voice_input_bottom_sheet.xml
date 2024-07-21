@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
     android:id="@+id/standard_bottom_sheet"
-    android:paddingBottom="@dimen/dp_xxxxlarge"
-    android:paddingTop="@dimen/dp_xxxxlarge"
-    android:gravity="center"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:paddingTop="64dp"
+    android:paddingBottom="64dp"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <com.eyalbira.loadingdots.LoadingDots
-        app:LoadingDots_dots_size="@dimen/dp_xxlarge"
-        app:LoadingDots_dots_color="?colorOnBackground"
-        app:LoadingDots_auto_play="true"
-        app:LoadingDots_jump_height="@dimen/dp_xxxlarge"
-        app:LoadingDots_dots_count="5"
-        app:LoadingDots_loop_duration="1200"
-        app:LoadingDots_loop_start_delay="100"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        app:LoadingDots_auto_play="true"
+        app:LoadingDots_dots_color="?attr/colorAccent"
+        app:LoadingDots_dots_count="5"
+        app:LoadingDots_dots_size="32dp"
+        app:LoadingDots_jump_height="48dp"
+        app:LoadingDots_loop_duration="1200"
+        app:LoadingDots_loop_start_delay="100" />
 
 </LinearLayout>

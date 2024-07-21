@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="false">
+    android:layout_height="match_parent">
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_view_new_chat"
@@ -16,7 +15,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="SpeakableTextPresentCheck">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/image_lumi_ai"
             android:layout_width="128dp"
             android:layout_height="wrap_content"
@@ -25,6 +24,7 @@
             android:contentDescription="@string/app_name"
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/lumi_ai_logo"
+            app:strokeWidth="0dp"
             app:tint="?colorPrimary" />
 
     </androidx.core.widget.NestedScrollView>
@@ -33,6 +33,7 @@
         android:id="@+id/recycler_view_chat"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="-16dp"
         android:scrollbars="vertical"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/layout_footer"
@@ -45,7 +46,7 @@
         style="?attr/floatingActionButtonSmallStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/dp_large"
+        android:layout_margin="16dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/recycler_view_chat"
         app:layout_constraintEnd_toEndOf="@+id/recycler_view_chat"
@@ -56,8 +57,8 @@
         android:id="@+id/layout_footer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/dp_medium"
-        android:layout_marginBottom="@dimen/dp_medium"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginBottom="4dp"
         android:baselineAligned="false"
         android:gravity="center"
         android:orientation="horizontal"
@@ -80,7 +81,7 @@
                 android:id="@+id/recycler_view_chat_files"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/dp_large"
+                android:layout_marginHorizontal="16dp"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:itemCount="5"
@@ -91,7 +92,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_add_files"
                     style="?attr/materialIconButtonStyle"
                     android:layout_width="60dp"
@@ -99,6 +100,7 @@
                     android:layout_marginEnd="0dp"
                     app:icon="@drawable/ic_add"
                     app:iconGravity="textEnd"
+                    app:strokeWidth="0dp"
                     tools:ignore="SpeakableTextPresentCheck" />
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -108,13 +110,13 @@
                     android:layout_weight="1"
                     android:hint="@string/chat_input_box_hint"
                     android:maxLength="24000"
-                    android:maxLines="6"
+                    android:maxLines="8"
                     android:paddingStart="0dp"
                     android:paddingEnd="16dp"
                     android:scrollbars="vertical"
                     tools:ignore="TextContrastCheck,VisualLintTextFieldSize" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_speak"
                     style="?attr/materialIconButtonStyle"
                     android:layout_width="60dp"
@@ -122,6 +124,7 @@
                     android:layout_marginEnd="0dp"
                     app:icon="@drawable/ic_speak"
                     app:iconGravity="textEnd"
+                    app:strokeWidth="0dp"
                     tools:ignore="SpeakableTextPresentCheck" />
 
             </LinearLayout>
@@ -135,42 +138,31 @@
             android:layout_marginStart="8dp"
             android:layout_weight="0">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_send_query"
                 style="?attr/materialIconButtonFilledTonalStyle"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
                 android:gravity="center"
                 app:icon="@drawable/ic_send"
                 app:iconGravity="textEnd"
+                app:strokeWidth="0dp"
                 tools:ignore="SpeakableTextPresentCheck" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_stop_query"
                 style="?attr/materialIconButtonFilledTonalStyle"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
                 android:backgroundTint="?colorErrorContainer"
                 android:visibility="gone"
                 app:icon="@drawable/ic_stop"
                 app:iconGravity="textEnd"
+                app:strokeWidth="0dp"
                 tools:ignore="SpeakableTextPresentCheck" />
 
         </FrameLayout>
 
     </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/layout_padding_consumer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="UselessLeaf" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

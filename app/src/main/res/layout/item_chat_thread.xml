@@ -19,32 +19,33 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:background="@drawable/user_icon_background"
-            android:scaleType="fitCenter"
             android:padding="10dp"
-            app:tint="?colorPrimary"
-            app:srcCompat="@drawable/ic_person" />
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/ic_person"
+            app:tint="?colorPrimary" />
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_view_user_chat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:layout_gravity="center"
-            app:cardElevation="0dp"
+            android:layout_marginStart="8dp"
             app:cardBackgroundColor="@android:color/transparent"
-            app:cardCornerRadius="8dp">
+            app:cardCornerRadius="8dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
 
             <LinearLayout
-                android:orientation="vertical"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-                <TextView
+                <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/text_view_user_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="8dp"
-                    android:text="User"
+                    android:text="@string/user"
                     android:textIsSelectable="false"
                     android:textStyle="bold"
                     tools:ignore="SpeakableTextPresentCheck" />
@@ -53,13 +54,13 @@
                     android:id="@+id/horizontalScrollView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/dp_medium">
+                    android:layout_marginHorizontal="8dp">
 
                     <LinearLayout
                         android:id="@+id/scroll_view_files"
-                        android:orientation="horizontal"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
 
                 </HorizontalScrollView>
 
@@ -69,12 +70,12 @@
                     android:layout_height="wrap_content"
                     android:padding="8dp"
                     android:textIsSelectable="false"
-                    tools:text="User message"
-                    tools:ignore="SpeakableTextPresentCheck" />
+                    tools:ignore="SpeakableTextPresentCheck"
+                    tools:text="User message" />
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 
@@ -92,27 +93,28 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:background="@drawable/user_icon_background"
-            android:scaleType="fitCenter"
             android:padding="10dp"
-            app:tint="?colorPrimary"
-            app:srcCompat="@drawable/ic_psychology" />
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/ic_psychology"
+            app:tint="?colorPrimary" />
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_view_ai_chat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:layout_gravity="center"
-            app:cardElevation="0dp"
+            android:layout_marginStart="8dp"
             app:cardBackgroundColor="@android:color/transparent"
-            app:cardCornerRadius="8dp">
+            app:cardCornerRadius="8dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
 
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="8dp">
 
-                <TextView
+                <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/text_view_ai_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -121,13 +123,13 @@
                     android:textStyle="bold"
                     tools:ignore="SpeakableTextPresentCheck" />
 
-                <TextView
+                <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/text_view_ai_chat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textIsSelectable="false"
                     android:layout_below="@id/text_view_ai_name"
                     android:paddingVertical="8dp"
+                    android:textIsSelectable="false"
                     tools:ignore="SpeakableTextPresentCheck" />
 
                 <com.eyalbira.loadingdots.LoadingDots
@@ -136,15 +138,15 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/text_view_ai_name"
                     android:paddingVertical="8dp"
+                    app:LoadingDots_dots_color="?attr/colorAccent"
                     app:LoadingDots_dots_size="6dp"
                     app:LoadingDots_dots_space="4dp"
-                    app:LoadingDots_dots_color="?attr/colorAccent"
                     app:LoadingDots_loop_duration="1200"
                     app:LoadingDots_loop_start_delay="300" />
 
             </RelativeLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 

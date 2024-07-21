@@ -10,7 +10,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.widget.PopupMenu
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.core.view.MenuHost
@@ -24,6 +24,8 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
+import com.looper.android.support.util.DialogUtils
+import com.looper.vic.MyApp
 import com.looper.vic.R
 import com.looper.vic.adapter.ChatsAdapter
 import com.looper.vic.util.ChatUtils
@@ -31,7 +33,7 @@ import java.lang.reflect.Field
 
 class ChatsFragment : Fragment(), MenuProvider {
     // Declare variables.
-    private val chatsAdapter = ChatsAdapter()
+    private lateinit var chatsAdapter: ChatsAdapter
     private lateinit var navController: NavController
     private lateinit var recyclerView: RecyclerView
     private lateinit var recyclerViewLayoutManager: RecyclerView.LayoutManager
@@ -56,6 +58,7 @@ class ChatsFragment : Fragment(), MenuProvider {
         navController = view.findNavController()
         recyclerView = view.findViewById(R.id.recycler_view_chats)
         cardViewNoChats = view.findViewById(R.id.card_view_no_chats)
+        chatsAdapter = ChatsAdapter(activity as AppCompatActivity)
 
         // If no chats are available, then make recycler view invisible and show card view.
         if (chatsAdapter.itemCount == 0) {
@@ -75,19 +78,6 @@ class ChatsFragment : Fragment(), MenuProvider {
             )
         }
 
-        chatsAdapter.onItemLongClick = { chatId: Int, position: Int ->
-            val popupMenu = PopupMenu(requireContext(), requireView())
-            popupMenu.menuInflater.inflate(R.menu.fragment_chats_popup_menu, popupMenu.menu)
-            popupMenu.setOnMenuItemClickListener { menuItem ->
-                when (menuItem.itemId) {
-                    R.id.delete_chat -> deleteConversation(chatId, position)
-                }
-                true
-            }
-            popupMenu.show()
-            true
-        }
-
         // Set up RecyclerView.
         recyclerView.adapter = chatsAdapter
         recyclerViewLayoutManager = LinearLayoutManager(context)
@@ -104,10 +94,12 @@ class ChatsFragment : Fragment(), MenuProvider {
         menuInflater.inflate(R.menu.fragment_chats_menu, menu)
 
         val searchIcon = menu.findItem(R.id.search_chat)
+        val deleteAllChatsItem = menu.findItem(R.id.delete_all_chats)
         val searchView: SearchView = searchIcon.actionView as SearchView
 
-        // If no chats are available, then hide search menu item.
+        // If no chats are available, then hide search menu and delete all chats item.
         searchIcon.isVisible = chatsAdapter.itemCount != 0
+        deleteAllChatsItem.isVisible = chatsAdapter.itemCount != 0
 
         // Set search hint.
         searchView.queryHint = getString(R.string.search_chat)
@@ -140,22 +132,96 @@ class ChatsFragment : Fragment(), MenuProvider {
     }
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-        return false
+        return when (menuItem.itemId) {
+            R.id.delete_all_chats -> {
+                deleteAllConversations()
+                true
+            }
+
+            else -> false
+        }
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        val chatId = item.intent.getIntExtra("chatId", -1)
+        val position = item.intent.getIntExtra("position", -1)
+
+        return when (item.itemId) {
+            R.id.edit_chat_title -> {
+                displayEditChatTitleDialog(chatId)
+                true
+            }
+
+            R.id.delete_chat -> {
+                deleteConversation(chatId, position)
+                true
+            }
+
+            else -> super.onContextItemSelected(item)
+        }
     }
 
     private fun deleteConversation(chatId: Int, position: Int) {
-        // Delete conversation.
-        ChatUtils.deleteAllThreadsOfChat(chatId)
+        DialogUtils.displayActionConfirmDialog(
+            context = requireContext(),
+            title = getString(R.string.delete_chat),
+            onPositiveAction = {
+                // Delete conversation.
+                ChatUtils.deleteAllThreadsOfChat(chatId)
 
-        // Notify change.
-        chatsAdapter.notifyItemRemoved(position)
-        activity?.recreate()
+                // Notify change.
+                chatsAdapter.notifyItemRemoved(position)
+                activity?.recreate()
 
-        // Show a toast message.
-        Toast.makeText(
-            context,
-            requireContext().getString(R.string.chat_toast_delete_conversation),
-            Toast.LENGTH_SHORT
-        ).show()
+                // Show a toast message.
+                Toast.makeText(
+                    context,
+                    requireContext().getString(R.string.chat_toast_delete_conversation),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        )
+    }
+
+    private fun deleteAllConversations() {
+        DialogUtils.displayActionConfirmDialog(
+            context = requireContext(),
+            title = getString(R.string.delete_all_chats),
+            onPositiveAction = {
+                // Delete all conversations.
+                ChatUtils.deleteAllChats()
+                activity?.recreate()
+
+                // Show a toast message.
+                Toast.makeText(
+                    context,
+                    getString(R.string.all_conversations_deleted),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        )
+    }
+
+    private fun displayEditChatTitleDialog(chatId: Int) {
+        val chat = MyApp.chatDao().getChat(chatId)
+
+        DialogUtils.displayEditTextDialog(
+            context = requireContext(),
+            title = getString(R.string.edit_chat_title),
+            initialInput = ChatUtils.getChatTitle(chatId, false),
+            onPositiveAction = { input ->
+                // Set the new chat title.
+                val newChatTitle = input.text.toString().trim()
+                if (newChatTitle.isNotEmpty()) {
+                    ChatUtils.setChatTitle(
+                        activity as AppCompatActivity?,
+                        chatId,
+                        chat?.tool,
+                        newChatTitle
+                    )
+                    activity?.recreate()
+                }
+            }
+        )
     }
 }

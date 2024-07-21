@@ -4,11 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.textview.MaterialTextView
 import com.looper.android.support.util.AppUtils
 import com.looper.android.support.util.IntentUtils
 import com.looper.vic.R
@@ -31,8 +31,8 @@ class AboutFragment : Fragment() {
         navController = view.findNavController()
 
         // Set up version number.
-        val version = AppUtils.getVersion(requireContext())
-        view.findViewById<TextView>(R.id.text_version_number).text = version
+        val version = "v${AppUtils.getVersionName(requireContext())}"
+        view.findViewById<MaterialTextView>(R.id.text_version_number).text = version
 
         // Set up click listener.
         view.findViewById<MaterialCardView>(R.id.card_more_apps_on_play_store).setOnClickListener {

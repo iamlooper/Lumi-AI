@@ -5,15 +5,15 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
-    android:layout_marginEnd="@dimen/dp_medium"
+    android:layout_marginEnd="8dp"
     android:clickable="true"
     android:foreground="?selectableItemBackground"
     android:hapticFeedbackEnabled="true"
     app:cardBackgroundColor="?colorSurfaceContainerHigh"
     app:cardCornerRadius="8dp"
-    app:chipCornerRadius="@dimen/dp_xxlarge"
+    app:chipCornerRadius="32dp"
     app:strokeWidth="0dp"
-    tools:text="My dream.png">
+    tools:ignore="KeyboardInaccessibleWidget">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -23,26 +23,26 @@
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:contentDescription="@null"
             android:src="@drawable/ic_file"
+            app:strokeWidth="0dp"
             app:tint="?colorOnBackground" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/text_view_file_name"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="30dp"
+            android:layout_marginEnd="8dp"
             android:ellipsize="end"
             android:singleLine="true"
             android:textSize="13sp"
-            tools:ignore="SpeakableTextPresentCheck"
-            tools:text="File name" />
+            tools:ignore="SpeakableTextPresentCheck,TextSizeCheck"
+            tools:text="File name 1234567890123" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/text_view_file_size"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
             android:ellipsize="end"
             android:singleLine="true"
             android:textSize="12sp"
-            tools:ignore="SpeakableTextPresentCheck"
+            tools:ignore="SpeakableTextPresentCheck,TextContrastCheck"
             tools:text="File size" />
 
     </LinearLayout>

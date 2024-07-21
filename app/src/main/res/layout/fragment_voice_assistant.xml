@@ -5,72 +5,74 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:orientation="vertical"
-    tools:context=".fragment.VoiceAssistantFragment">
+    android:orientation="vertical">
 
     <com.eyalbira.loadingdots.LoadingDots
         android:id="@+id/waveform_seek_bar"
-        app:LoadingDots_dots_size="@dimen/dp_xxlarge"
-        app:LoadingDots_dots_color="?colorOnBackground"
-        app:LoadingDots_auto_play="false"
-        app:LoadingDots_jump_height="@dimen/dp_xxxlarge"
-        app:LoadingDots_dots_count="5"
-        app:LoadingDots_loop_duration="1200"
-        app:LoadingDots_loop_start_delay="100"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        app:LoadingDots_auto_play="false"
+        app:LoadingDots_dots_color="?colorOnBackground"
+        app:LoadingDots_dots_count="5"
+        app:LoadingDots_dots_size="32dp"
+        app:LoadingDots_jump_height="48dp"
+        app:LoadingDots_loop_duration="1200"
+        app:LoadingDots_loop_start_delay="100" />
 
-    <TextView
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/text_speak_result"
-        android:layout_marginTop="@dimen/dp_large"
-        android:layout_marginBottom="@dimen/dp_large"
-        tools:text="Hello world"
-        android:gravity="center"
-        android:paddingStart="@dimen/dp_large"
-        android:paddingEnd="@dimen/dp_large"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:gravity="center"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        tools:text="Hello world" />
 
     <LinearLayout
-        android:gravity="center"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:gravity="center">
 
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_start_speak"
                 style="?attr/materialIconButtonFilledTonalStyle"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
                 app:icon="@drawable/ic_speak"
                 app:iconGravity="textEnd"
                 app:iconSize="56dp"
-                android:id="@+id/button_start_speak"
-                android:layout_width="96dp"
-                android:layout_height="96dp" />
+                app:strokeWidth="0dp" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_end_speak"
                 style="?attr/materialIconButtonFilledTonalStyle"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:visibility="gone"
                 app:icon="@drawable/ic_stop"
                 app:iconGravity="textEnd"
                 app:iconSize="56dp"
-                android:id="@+id/button_end_speak"
-                android:visibility="gone"
-                android:layout_width="96dp"
-                android:layout_height="96dp" />
+                app:strokeWidth="0dp" />
 
         </FrameLayout>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_send_speak_result"
             style="?attr/materialIconButtonFilledTonalStyle"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:visibility="gone"
             app:icon="@drawable/ic_send"
             app:iconGravity="textEnd"
             app:iconSize="36dp"
-            android:id="@+id/button_send_speak_result"
-            android:visibility="gone"
-            android:layout_width="72dp"
-            android:layout_height="72dp" />
+            app:strokeWidth="0dp" />
     </LinearLayout>
 
 

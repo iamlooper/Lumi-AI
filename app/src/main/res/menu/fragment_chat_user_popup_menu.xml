@@ -3,4 +3,8 @@
     <item
         android:id="@+id/copy_clipboard"
         android:title="@string/chat_copy_to_clipboard" />
+
+    <item
+        android:id="@+id/select_text"
+        android:title="@string/select_text" />
 </menu>

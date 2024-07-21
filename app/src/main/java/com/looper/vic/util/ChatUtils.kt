@@ -1,7 +1,7 @@
 package com.looper.vic.util
 
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import com.looper.vic.MyApp
 import com.looper.vic.R
@@ -22,7 +22,7 @@ object ChatUtils {
         return randomNumber
     }
 
-    fun getChatTitle(chatId: Int): String {
+    fun getChatTitle(chatId: Int, retWithToolType: Boolean = true): String {
         val retValue: String
         val title = MyApp.chatDao().getChatTitleSQL(chatId)
         retValue = if (!title.isNullOrEmpty()) {
@@ -32,16 +32,18 @@ object ChatUtils {
             if (list.isNotEmpty()) {
                 list.first().userContent
             } else {
-                MyApp.context.getString(R.string.title_chat)
+                MyApp.getAppContext()!!.getString(R.string.title_chat)
             }
         }
 
-        val toolType = MyApp.chatDao().getToolType(chatId)
         var addition = ""
-        if (toolType != null) {
-            val toolTypeEntry = MyApp.allCategoryCache.find { it.first == toolType }
-            if (toolTypeEntry != null) {
-                addition = " (${toolTypeEntry.second})"
+        if (retWithToolType) {
+            val toolType = MyApp.chatDao().getToolType(chatId)
+            if (toolType != null) {
+                val toolTypeEntry = MyApp.allCategoryCache.find { it.first == toolType }
+                if (toolTypeEntry != null) {
+                    addition = " (${toolTypeEntry.second})"
+                }
             }
         }
 
@@ -77,9 +79,16 @@ object ChatUtils {
         MyApp.chatDao().deleteChat(MyApp.chatDao().getChat(chatId)!!)
     }
 
+    fun deleteAllChats() {
+        val chatIds = MyApp.chatDao().getAllChatIds()
+        for (chatId in chatIds) {
+            MyApp.chatDao().deleteAllThreadsOfChat(chatId)
+            MyApp.chatDao().deleteChat(MyApp.chatDao().getChat(chatId)!!)
+        }
+    }
+
     fun setChatTitle(
         activity: AppCompatActivity?,
-        fragment: Fragment,
         chatId: Int,
         toolType: String?,
         title: String?
@@ -109,7 +118,8 @@ object ChatUtils {
         if (activity != null) {
             val navHostFragment = activity
                 .supportFragmentManager
-                .findFragmentById(com.looper.android.support.R.id.fragment_container_view_content_main) as NavHostFragment
+                .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+            val navController = navHostFragment.navController
 
             // Set title on the navigation drawer.
             (activity as MainActivity).setDrawerFragmentTitle(
@@ -117,8 +127,8 @@ object ChatUtils {
                 actualTitle
             )
 
-            // Set title to action bar if the current fragment is being shown.
-            if (navHostFragment.childFragmentManager.primaryNavigationFragment == fragment) {
+            // Set title to action bar if the chat fragment is being shown.
+            if (navController.currentDestination?.id == R.id.fragment_chat) {
                 activity.supportActionBar?.title = actualTitle
             }
         }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <item
         android:id="@+id/search_chat"
@@ -8,5 +9,12 @@
         android:title="@string/search_chat"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="always|collapseActionView" />
+
+    <item
+        android:id="@+id/delete_all_chats"
+        android:icon="@drawable/ic_delete"
+        android:title="@string/delete_all_chats"
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction" />
 
 </menu>

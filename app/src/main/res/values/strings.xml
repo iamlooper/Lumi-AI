@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Main -->
     <string name="app_name">Lumi AI</string>
-    <string name="app_title">Lumi AI</string>
     <string name="app_description">A friendly AI sidekick with a human-like personality.</string>
-
-    <!-- Navigation -->
     <string name="title_chat">New Chat</string>
     <string name="title_chats">Chats</string>
     <string name="title_tools">Tools</string>
@@ -13,69 +9,50 @@
     <string name="title_about">About</string>
     <string name="title_group_other">Other</string>
     <string name="title_voice_assistant">Voice assistant</string>
-
-    <string name="drawer_nav_header_title">@string/app_title</string>
-    <string name="drawer_nav_header_desc">@string/app_description</string>
-
-    <!-- Chat -->
     <string name="chat_new">New chat</string>
     <string name="chat_delete">Delete</string>
     <string name="chat_close">Close</string>
     <string name="chat_regenerate_response">Regenerate response</string>
     <string name="chat_speak">Speak</string>
-
     <string name="chat_toast_new_conversation">Started a new conversation</string>
-
     <string name="chat_toast_delete_conversation">Deleted conversation!</string>
     <string name="chat_toast_delete_conversation_not_found">No conversation to delete</string>
-
     <string name="chat_toast_copy_clipboard">Copied to clipboard</string>
-
     <string name="chat_input_box_hint">Type your query here</string>
-
     <string name="user_cancelled_response">Response cancelled by the user.</string>
     <string name="network_error_response">Network error. Please try again later.</string>
     <string name="unexpected_error_response">Unexpected error. Please try again later.</string>
-
     <string name="file_empty">File (%s) is empty</string>
     <string name="file_exceeds_size_limit">File (%s) exceeds the size limit of %s</string>
     <string name="file_not_supported">File (%s) is not supported</string>
-
-    <!-- Chats -->
     <string name="chat_history_search">Search</string>
     <string name="search_chat">Search chat</string>
-
     <string name="fragment_chats_no_chats_message">Your chats will appear here</string>
-
-    <!-- Settings -->
     <string name="settings_ai">AI</string>
-
     <string name="settings_ai_style_title">Conversational style</string>
     <string name="settings_ai_style_summary">%s</string>
-
     <string name="settings_ai_web_search_title">Web search</string>
     <string name="settings_ai_web_search_summary">Allow AI to perform web search</string>
-
     <string name="pref_custom_instructions_title">Custom instructions</string>
     <string name="pref_custom_instructions_summary">Modify the behavior of the AI</string>
     <string name="pref_custom_instructions_input_hint">Type your instructions here</string>
-
-    <!-- About -->
     <string name="about_app_developed_by">Developed by <a href="https://github.com/iamlooper">Looper</a></string>
     <string name="about_app_more_info">More information: <a href="https://github.com/iamlooper/Lumi-AI">Click here</a>\n(description, credits and licenses etc.)</string>
     <string name="about_more_apps_on_ps">More apps on Play Store: <a href="https://play.google.com/store/apps/dev?id=6115418187591502860">Click here</a></string>
-
     <string name="more_apps_on_play_store_title">More apps on Play Store</string>
     <string name="more_apps_on_play_store_summary">Try other apps by me on Play Store</string>
-
     <string name="release_channel_title">Release channel</string>
     <string name="release_channel_summary">Checkout new updates and projects on our Telegram channel</string>
-
     <string name="credits_title">Credits</string>
     <string name="credits_summary">Much appreciated people who helped me with this app</string>
-
     <string name="licenses_title">Licenses</string>
     <string name="licenses_summary">Libraries used to develop this app</string>
-
     <string name="chat_copy_to_clipboard">Copy to clipboard</string>
+    <string name="user">User</string>
+    <string name="edit_chat_title">Edit chat title</string>
+    <string name="edit">Edit</string>
+    <string name="delete_all_chats">Delete all chats</string>
+    <string name="delete_chat">Delete chat</string>
+    <string name="all_conversations_deleted">All conversations deleted!</string>
+    <string name="select_text">Select text</string>
 </resources>

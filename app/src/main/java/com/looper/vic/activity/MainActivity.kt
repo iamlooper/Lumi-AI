@@ -1,28 +1,48 @@
 package com.looper.vic.activity
 
-import android.Manifest
 import android.os.Bundle
 import androidx.navigation.NavController
-import com.looper.android.support.activity.DrawerNavigationActivity
-import com.looper.android.support.util.PermissionUtils
+import com.google.android.material.appbar.AppBarLayout
 import com.looper.vic.R
 
 class MainActivity : DrawerNavigationActivity() {
 
-    private val destinationChangeListener = NavController.OnDestinationChangedListener { _, destination, _ ->
-        if (destination.id == R.id.fragment_voice_assistant) {
-            supportActionBar?.setDisplayHomeAsUpEnabled(false)
+    private val destinationChangeListener =
+        NavController.OnDestinationChangedListener { _, destination, _ ->
+            val appbar: AppBarLayout = findViewById(R.id.app_bar_layout)
+
+            when (destination.id) {
+                R.id.fragment_chat -> {
+                    appbar.liftOnScrollTargetViewId = R.id.recycler_view_chat
+                }
+
+                R.id.fragment_chats -> {
+                    appbar.liftOnScrollTargetViewId = R.id.recycler_view_chats
+                }
+
+                R.id.fragment_tools -> {
+                    appbar.liftOnScrollTargetViewId = R.id.recycler_view_tools
+                }
+
+                R.id.fragment_about -> {
+                    appbar.liftOnScrollTargetViewId = R.id.about_scroll_view
+                }
+
+                R.id.fragment_voice_assistant -> {
+                    supportActionBar?.setDisplayHomeAsUpEnabled(false)
+                }
+
+                else -> {
+                    appbar.liftOnScrollTargetViewId = android.R.id.content
+                }
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Setup mobile_navigation.xml.
-        setupNavigation(R.navigation.mobile_navigation, R.menu.main_drawer_menu)
-
-        // Grant necessary permissions.
-        PermissionUtils.request(this@MainActivity, this, Manifest.permission.RECORD_AUDIO)
+        // Setup navigation.
+        setupNavigation(R.navigation.mobile_navigation, R.menu.activity_main_drawer)
     }
 
     override fun onStart() {
@@ -33,5 +53,9 @@ class MainActivity : DrawerNavigationActivity() {
     override fun onStop() {
         super.onStop()
         navController.removeOnDestinationChangedListener(destinationChangeListener)
+    }
+
+    override fun getContentView(): Int {
+        return R.layout.activity_main
     }
 }

@@ -30,9 +30,9 @@
             android:title="@string/title_about" />
 
         <item
-            android:visible="false"
             android:id="@+id/fragment_voice_assistant"
             android:icon="@drawable/ic_add"
-            android:title="@string/title_voice_assistant" />
+            android:title="@string/title_voice_assistant"
+            android:visible="false" />
     </group>
 </menu>
