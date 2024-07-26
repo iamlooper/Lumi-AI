@@ -22,10 +22,7 @@ android {
                
     buildTypes {
         getByName("release") {
-            // Disables code shrinking, obfuscation, and optimization.
             isMinifyEnabled = false
-            
-            // Includes the default ProGuard rules files.
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

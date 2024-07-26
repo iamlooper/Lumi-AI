@@ -6,16 +6,18 @@ core = "1.13.1"
 constraintLayout = "2.1.4"
 navigation = "2.7.7"
 preference = "1.2.1"
-fragment = "1.8.1"
+fragment = "1.8.2"
 material = "1.12.0"
 androidSupport = "2.9.0"
-okhttp = "4.11.0"
+okhttp = "4.12.0"
 okhttpSse = "4.11.0"
 markwon = "4.6.2"
 betterLinkMovementMethod = "2.2.0"
 secretsGradlePlugin = "2.0.1"
 room = "2.6.1"
-gson = "2.10.1"
+gson = "2.11.0"
+workRuntime = "2.9.0"
+jsoup = "1.18.1"
 
 [libraries]
 androidx-room-gradle-plugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
@@ -45,4 +47,5 @@ google-secrets-gradle-plugin = { group = "com.google.android.libraries.mapsplatf
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 google-code-gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
-
+jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
+androidx-work-runtime = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntime" }

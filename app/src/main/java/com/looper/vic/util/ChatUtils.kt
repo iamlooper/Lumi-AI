@@ -1,7 +1,6 @@
 package com.looper.vic.util
 
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import com.looper.vic.MyApp
 import com.looper.vic.R

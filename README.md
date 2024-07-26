@@ -5,9 +5,7 @@ A friendly AI sidekick with a human-like personality.
 
 ## Download 📲
 You can download Lumi AI from the following:
-- [Play Store](https://play.google.com/store/apps/details?id=com.looper.vic)
 - [Pling](https://www.pling.com/p/2059807)
-- [Buy Me a Coffee](https://buymeacoffee.com/iamlooper/posts) (Early access)
 
 ## Features ⭐
 - File Upload and Analysis
@@ -30,8 +28,8 @@ You can download Lumi AI from the following:
 
 ## Support Me 💙
 If you liked any one of my projects then consider supporting me via following:
-- [Buy Me a Coffee](https://buymeacoffee.com/iamlooper/membership)
-- [Telegram Channel](https://loopprojects.t.me)
+- [Telegram Channel](https://t.me/loopprojects)
+- [Pling](https://www.pling.com/p/2059807/startdownload?file_id=1721075340)
 
 ## Credits 👥
 Due to the combined efforts and expertise of the following people, this project has achieved its success:

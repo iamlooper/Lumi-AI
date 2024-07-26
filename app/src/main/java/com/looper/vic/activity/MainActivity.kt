@@ -28,6 +28,10 @@ class MainActivity : DrawerNavigationActivity() {
                     appbar.liftOnScrollTargetViewId = R.id.about_scroll_view
                 }
 
+                R.id.fragment_select_text -> {
+                    appbar.liftOnScrollTargetViewId = R.id.select_text_scroll_view
+                }
+
                 R.id.fragment_voice_assistant -> {
                     supportActionBar?.setDisplayHomeAsUpEnabled(false)
                 }

@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout    
+      - name: Checkout
         uses: actions/checkout@v4
         
       - name: Add necessary properties into the local.properties

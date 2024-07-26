@@ -18,7 +18,7 @@
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
--renamesourcefileattribute SourceFile
+#-renamesourcefileattribute SourceFile
 
 # Keep all model classes in the specified package.
 -keep class com.looper.vic.model.** { *; }
@@ -33,8 +33,3 @@
 -keep class sun.misc.Unsafe { *; }
 -keep class com.google.gson.stream.** { *; }
 -keep class com.google.gson.** { *; }
-
-# Misc.
--dontskipnonpubliclibraryclasses
--dontskipnonpubliclibraryclassmembers
--overloadaggressively

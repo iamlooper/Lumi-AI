@@ -21,7 +21,7 @@ android {
         applicationId = "com.looper.vic"
         minSdk = 24
         targetSdk = 34
-        versionCode = 40
+        versionCode = 41
         versionName = "2.1.0"
 
         vectorDrawables.useSupportLibrary = true
@@ -33,13 +33,8 @@ android {
     
     buildTypes {
         getByName("release") {
-            // Enables code shrinking, obfuscation, and optimization.
             isMinifyEnabled = true
-
-            // Enables resource shrinking.
             isShrinkResources = true
-
-            // Includes the default ProGuard rules files.
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -86,5 +81,7 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.google.code.gson)
     implementation(libs.looper.android.support)
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.jsoup)
     implementation(project(":loading-dots"))
 }
