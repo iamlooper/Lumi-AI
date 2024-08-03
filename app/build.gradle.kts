@@ -93,7 +93,5 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.google.code.gson)
     implementation(libs.looper.android.support)
-    implementation(libs.androidx.work.runtime)
-    implementation(libs.jsoup)
     implementation(project(":loading-dots"))
 }
