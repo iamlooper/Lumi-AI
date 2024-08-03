@@ -44,7 +44,7 @@ class VoiceInputFragment :
         // Find navigation controller.
         val navHostFragment = activity
             ?.supportFragmentManager
-            ?.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+            ?.findFragmentById(com.looper.android.support.R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
         // Initiate speech recognition.

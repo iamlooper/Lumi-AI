@@ -19,10 +19,10 @@ android {
 
     defaultConfig {
         applicationId = "com.looper.vic"
-        minSdk = 24
+        minSdk = 21
         targetSdk = 34
-        versionCode = 41
-        versionName = "2.1.0"
+        versionCode = 42
+        versionName = "2.2.0-beta-" + getCurrentDate()
 
         vectorDrawables.useSupportLibrary = true
     }
@@ -53,6 +53,18 @@ android {
 
     room {
         schemaDirectory("$projectDir/schemas")
+    }
+
+    sourceSets {
+        getByName("main") {
+            jniLibs.srcDirs("src/main/jniLibs")
+        }
+    }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 }
 

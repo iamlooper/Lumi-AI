@@ -117,7 +117,7 @@ object ChatUtils {
         if (activity != null) {
             val navHostFragment = activity
                 .supportFragmentManager
-                .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+                .findFragmentById(com.looper.android.support.R.id.nav_host_fragment) as NavHostFragment
             val navController = navHostFragment.navController
 
             // Set title on the navigation drawer.

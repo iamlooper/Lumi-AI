@@ -3,13 +3,14 @@ package com.looper.vic.activity
 import android.os.Bundle
 import androidx.navigation.NavController
 import com.google.android.material.appbar.AppBarLayout
+import com.looper.android.support.activity.DrawerNavigationActivity
 import com.looper.vic.R
 
 class MainActivity : DrawerNavigationActivity() {
 
     private val destinationChangeListener =
         NavController.OnDestinationChangedListener { _, destination, _ ->
-            val appbar: AppBarLayout = findViewById(R.id.app_bar_layout)
+            val appbar: AppBarLayout = findViewById(com.looper.android.support.R.id.app_bar_layout)
 
             when (destination.id) {
                 R.id.fragment_chat -> {
