@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.2.0
+- Simplified API calls
+- Fixed visual overlaps in app
+- Fixed app bar in select text feature
+- Updated deps
+- Misc. changes
+
 ## v2.1.0
 - Added select text feature
 - Fixed crash with voice input when rotating to landscape
