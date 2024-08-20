@@ -1,5 +1,5 @@
 [versions]
-gradle = "8.5.1"
+gradle = "8.5.2"
 kotlin = "1.9.22"
 appcompat = "1.7.0"
 core = "1.13.1"

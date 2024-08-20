@@ -1,6 +1,7 @@
 package com.looper.vic.fragment
 
 import android.Manifest
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -46,14 +47,11 @@ import com.looper.vic.model.Chat
 import com.looper.vic.model.ChatRequest
 import com.looper.vic.model.ChatResponse
 import com.looper.vic.model.ChatThread
-import com.looper.vic.model.ChatTitleRequest
-import com.looper.vic.util.AESUtils
 import com.looper.vic.util.ChatUtils
 import com.looper.vic.util.HashUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.Call
-import okhttp3.Callback
+import okhttp3.CertificatePinner
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -62,10 +60,17 @@ import okhttp3.Response
 import okhttp3.sse.EventSource
 import okhttp3.sse.EventSourceListener
 import okhttp3.sse.EventSources
+import java.io.BufferedInputStream
 import java.io.File
-import java.io.IOException
 import java.net.SocketTimeoutException
+import java.security.KeyStore
+import java.security.MessageDigest
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManagerFactory
+import javax.net.ssl.X509TrustManager
 
 class ChatFragment : Fragment(), NavController.OnDestinationChangedListener, MenuProvider {
 
@@ -73,12 +78,6 @@ class ChatFragment : Fragment(), NavController.OnDestinationChangedListener, Men
     private val fileSelector = registerForActivityResult(OpenMultipleDocuments()) {
         chatFilesAdapter.addFiles(it)
     }
-    private val okHttpClientBuilder: OkHttpClient.Builder =
-        OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(100, TimeUnit.SECONDS)
-            .writeTimeout(100, TimeUnit.SECONDS)
-    private val encryptKey: ByteArray = AESUtils.keyFromString(BuildConfig.encryptBase64Key)
     private val userCancelledResponse: String =
         MyApp.getAppContext()!!.getString(R.string.user_cancelled_response)
     private val networkErrorResponse: String =
@@ -88,8 +87,7 @@ class ChatFragment : Fragment(), NavController.OnDestinationChangedListener, Men
     private var chatId: Int = -1
     private var toolType: String? = null
     private var fragmentMenu: Menu? = null
-    private var apiRequestCall1: EventSource? = null
-    private var apiRequestCall2: Call? = null
+    private var apiRequestCall: EventSource? = null
     private lateinit var navController: NavController
     private lateinit var sharedPreferencesUtils: SharedPreferencesUtils
     private lateinit var speechUtils: SpeechUtils
@@ -123,7 +121,7 @@ class ChatFragment : Fragment(), NavController.OnDestinationChangedListener, Men
     }
 
     override fun onDestroy() {
-        cancelRequestCalls()
+        cancelApiRequest()
         speechUtils.destroy()
 
         if (chatAdapter.getThreadsOfChat().isNotEmpty()) {
@@ -236,7 +234,7 @@ class ChatFragment : Fragment(), NavController.OnDestinationChangedListener, Men
             }
 
             R.id.regenerate_response -> {
-                cancelRequestCalls()
+                cancelApiRequest()
 
                 // Make the thread pending and clear previous AI response.
                 chatThread.isPending = true
@@ -551,27 +549,26 @@ class ChatFragment : Fragment(), NavController.OnDestinationChangedListener, Men
             files = filesList
         )
 
-        // Prepare json and encrypt it.
+        // Prepare json.
         val json = Gson().toJson(jsonRequestData)
-        val encryptedJson = AESUtils.encrypt(json, encryptKey)
 
         // Get response from API.
-        getAIResponse(encryptedJson, thread)
+        getAIResponse(json, thread)
     }
 
     private fun getAIResponse(
-        jsonString: String,
+        json: String,
         thread: ChatThread
     ) {
         // Build okhttp client.
-        val client = okHttpClientBuilder.build()
+        val client = createCustomOkHttpClient(requireContext(), BuildConfig.apiBase)
 
         // Build request body.
-        val requestBody = jsonString.toRequestBody("text/plain".toMediaTypeOrNull())
+        val requestBody = json.toRequestBody("application/json".toMediaTypeOrNull())
 
         // Build request.
         val request = Request.Builder()
-            .url(BuildConfig.apiBaseUrl + "v2/chat")
+            .url("https://" + BuildConfig.apiBase + "/lumi-ai/v1/chat")
             .post(requestBody)
             .build()
 
@@ -612,6 +609,18 @@ class ChatFragment : Fragment(), NavController.OnDestinationChangedListener, Men
                             jsonData.chunk?.let { chunk ->
                                 chatAdapter.updateThreadWithResponsePart(thread, chunk)
                             }
+
+                            jsonData.title?.let { chunk ->
+                                activity?.runOnUiThread {
+                                    // Set the chat title.
+                                    ChatUtils.setChatTitle(
+                                        activity as AppCompatActivity?,
+                                        chatId,
+                                        toolType,
+                                        chunk
+                                    )
+                                }
+                            }
                         }
                     } catch (e: Exception) {
                         activity?.runOnUiThread {
@@ -622,11 +631,6 @@ class ChatFragment : Fragment(), NavController.OnDestinationChangedListener, Men
             }
 
             override fun onClosed(eventSource: EventSource) {
-                // Process chat title if it is a new chat.
-                if (chatAdapter.itemCount == 1) {
-                    processChatTitle(thread)
-                }
-
                 // Speak if it is a voice input.
                 if (thread.isVoiceInput && !thread.isCancelled) {
                     lifecycleScope.launch(Dispatchers.Main) {
@@ -662,76 +666,13 @@ class ChatFragment : Fragment(), NavController.OnDestinationChangedListener, Men
         }
 
         // Create EventSource.
-        apiRequestCall1 =
+        apiRequestCall =
             EventSources.createFactory(client).newEventSource(request, eventSourceListener)
-    }
-
-    private fun processChatTitle(thread: ChatThread) {
-        // Initialize variables.
-        val userQuery = thread.userContent
-        val timestamp = System.currentTimeMillis() / 1000
-        val signatureHash = HashUtils.generateSignHash(
-            userQuery.take(10),
-            timestamp,
-            BuildConfig.apiKey
-        )
-
-        // Prepare request data.
-        val jsonRequestData = ChatTitleRequest(
-            query = userQuery,
-            time = timestamp.toInt(),
-            sign = signatureHash
-        )
-        val json = Gson().toJson(jsonRequestData)
-        val encryptedJson = AESUtils.encrypt(json, encryptKey)
-
-        // Build okhttp client.
-        val client = okHttpClientBuilder.build()
-
-        // Build request body.
-        val requestBody = encryptedJson.toRequestBody("text/plain".toMediaTypeOrNull())
-
-        // Build request.
-        val request = Request.Builder()
-            .url(BuildConfig.apiBaseUrl + "v1/title")
-            .post(requestBody)
-            .build()
-
-        // Send API request.
-        apiRequestCall2 = client.newCall(request)
-
-        // Enqueue the API call.
-        apiRequestCall2?.enqueue(object : Callback {
-            override fun onResponse(
-                call: Call,
-                response: Response
-            ) {
-                val chatTitle: String = if (response.isSuccessful) {
-                    response.body?.string() ?: userQuery
-                } else {
-                    userQuery
-                }
-
-                activity?.runOnUiThread {
-                    // Set the chat title.
-                    ChatUtils.setChatTitle(
-                        activity as AppCompatActivity?,
-                        chatId,
-                        toolType,
-                        chatTitle
-                    )
-                }
-            }
-
-            override fun onFailure(call: Call, e: IOException) {
-                // No operation.
-            }
-        })
     }
 
     private fun cancelQuery(thread: ChatThread, cancelResponse: String) {
         // Set pending to true if response is streaming.
-        if (apiRequestCall1 != null) {
+        if (apiRequestCall != null) {
             thread.isPending = true
         }
 
@@ -745,8 +686,8 @@ class ChatFragment : Fragment(), NavController.OnDestinationChangedListener, Men
         (querySendButton as MaterialButton?)?.visibility = View.VISIBLE
         (queryStopButton as MaterialButton?)?.visibility = View.INVISIBLE
 
-        // Cancel all calls.
-        cancelRequestCalls()
+        // Cancel api request.
+        cancelApiRequest()
 
         // Update conversation status.
         (chatAdapter as ChatAdapter?)?.cancelPendingQuery(thread, cancelResponse)
@@ -848,11 +789,9 @@ class ChatFragment : Fragment(), NavController.OnDestinationChangedListener, Men
         )
     }
 
-    private fun cancelRequestCalls() {
-        apiRequestCall1?.cancel()
-        apiRequestCall2?.cancel()
-        apiRequestCall1 = null
-        apiRequestCall2 = null
+    private fun cancelApiRequest() {
+        apiRequestCall?.cancel()
+        apiRequestCall = null
     }
 
     private fun getVoiceInput() {
@@ -866,5 +805,56 @@ class ChatFragment : Fragment(), NavController.OnDestinationChangedListener, Men
                 onDestinationChanged(navController, navController.currentDestination!!, null)
             }
         })
+    }
+
+    private fun createCustomOkHttpClient(context: Context, hostname: String): OkHttpClient {
+        val certificateInputStream = context.assets.open("cert.pem")
+
+        // Create a KeyStore containing our trusted CAs
+        val keyStoreType = KeyStore.getDefaultType()
+        val keyStore = KeyStore.getInstance(keyStoreType).apply {
+            load(null, null)
+        }
+
+        val certificate: X509Certificate
+        certificateInputStream.use { certStream ->
+            val certificateFactory = CertificateFactory.getInstance("X.509")
+            certificate = certificateFactory.generateCertificate(BufferedInputStream(certStream)) as X509Certificate
+            keyStore.setCertificateEntry("ca", certificate)
+        }
+
+        // Create a TrustManager that trusts the CAs in our KeyStore
+        val tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm()
+        val trustManagerFactory = TrustManagerFactory.getInstance(tmfAlgorithm).apply {
+            init(keyStore)
+        }
+
+        // Create an SSLContext that uses our TrustManager
+        val sslContext = SSLContext.getInstance("TLS").apply {
+            init(null, trustManagerFactory.trustManagers, null)
+        }
+
+        // Generate the certificate pin
+        val publicKey = certificate.publicKey.encoded
+        val messageDigest = MessageDigest.getInstance("SHA-256")
+        val publicKeyHash = messageDigest.digest(publicKey)
+        val publicKeyBase64 = Base64.encodeToString(publicKeyHash, Base64.NO_WRAP)
+        val pin = "sha256/$publicKeyBase64"
+
+        // Create a CertificatePinner with the generated pin
+        val certificatePinner = CertificatePinner.Builder()
+            .add(hostname, pin)
+            .build()
+
+        return OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(100, TimeUnit.SECONDS)
+            .writeTimeout(100, TimeUnit.SECONDS)
+            .sslSocketFactory(sslContext.socketFactory, trustManagerFactory.trustManagers[0] as X509TrustManager)
+            .hostnameVerifier { serverHostname, _ ->
+                serverHostname == hostname
+            }
+            .certificatePinner(certificatePinner)
+            .build()
     }
 }

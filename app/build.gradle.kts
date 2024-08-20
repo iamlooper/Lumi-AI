@@ -54,18 +54,6 @@ android {
     room {
         schemaDirectory("$projectDir/schemas")
     }
-
-    sourceSets {
-        getByName("main") {
-            jniLibs.srcDirs("src/main/jniLibs")
-        }
-    }
-
-    packaging {
-        jniLibs {
-            useLegacyPackaging = true
-        }
-    }
 }
 
 dependencies {
