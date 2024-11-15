@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="ai_style">
+        <item>Творческий</item>
+        <item>Сбалансированный</item>
+        <item>Точный</item>
+    </string-array>
+
+    <string-array name="ai_style_value">
+        <item>creative</item>
+        <item>balanced</item>
+        <item>precise</item>
+    </string-array>
+
+    <string-array name="ai_categories">
+        <item>Все</item>
+        <item>Написание</item>
+        <item>Программирование</item>
+        <item>Другие</item>
+    </string-array>
+
+    <string-array name="ai_category_writing">
+        <item>Автор контента</item>
+        <item>Проверка на плагиат</item>
+        <item>Рекламщик</item>
+        <item>Журналист</item>
+        <item>Корректор</item>
+        <item>Рассказчик</item>
+        <item>Сценарист</item>
+        <item>Романист</item>
+        <item>Философ</item>
+        <item>Учитель математики</item>
+        <item>Историк</item>
+        <item>Этимолог</item>
+    </string-array>
+
+    <string-array name="ai_category_writing_value">
+        <item>content_writer</item>
+        <item>plagiarism_checker</item>
+        <item>advertiser</item>
+        <item>journalist</item>
+        <item>proof_reader</item>
+        <item>storyteller</item>
+        <item>screenwriter</item>
+        <item>novelist</item>
+        <item>philosopher</item>
+        <item>math_teacher</item>
+        <item>historian</item>
+        <item>etymologist</item>
+    </string-array>
+
+    <string-array name="ai_category_coding">
+        <item>Программист</item>
+        <item>Терминал Linux</item>
+        <item>Консоль JavaScript</item>
+        <item>Терминал SQL</item>
+        <item>Помощник Git</item>
+        <item>Разработчик UX/UI</item>
+        <item>Интерпретатор Python</item>
+        <item>Разработчик веб-приложений</item>
+        <item>Интерпретатор R</item>
+    </string-array>
+
+    <string-array name="ai_category_coding_value">
+        <item>coder</item>
+        <item>linux_terminal</item>
+        <item>javascript_console</item>
+        <item>sql_terminal</item>
+        <item>git_assistant</item>
+        <item>ux_ui_developer</item>
+        <item>python_interpreter</item>
+        <item>web_app_developer</item>
+        <item>r_programming_interpreter</item>
+    </string-array>
+
+    <string-array name="ai_category_others">
+        <item>Поэт</item>
+        <item>Рэпер</item>
+        <item>Эксперт по DIY</item>
+        <item>Дизайнер интерьеров</item>
+        <item>Книга афоризмов</item>
+        <item>Текстовая игра-приключение</item>
+        <item>Архитектор IT</item>
+        <item>Поставщик синонимов</item>
+        <item>Генератор регулярных выражений</item>
+        <item>Генератор паролей</item>
+        <item>Генератор подсказок</item>
+        <item>Улучшатель подсказок</item>
+        <item>Генератор идей для стартапов</item>
+        <item>Данный ученый</item>
+    </string-array>
+
+    <string-array name="ai_category_others_value">
+        <item>poet</item>
+        <item>rapper</item>
+        <item>diy_expert</item>
+        <item>interior_decorator</item>
+        <item>aphorism_book</item>
+        <item>text_based_adventure_game</item>
+        <item>it_architect</item>
+        <item>synonyms_provider</item>
+        <item>regex_generator</item>
+        <item>password_generator</item>
+        <item>prompt_generator</item>
+        <item>prompt_enhancer</item>
+        <item>startup_idea_generator</item>
+        <item>data_scientist</item>
+    </string-array>
+</resources>
