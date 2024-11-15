@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_description">Дружелюбный помощник с искусственным интеллектом, обладающий человекоподобной личностью.</string>
+    <string name="title_chat">Новый чат</string>
+    <string name="title_chats">Чаты</string>
+    <string name="title_tools">Инструменты</string>
+    <string name="title_settings">Настройки</string>
+    <string name="title_about">О приложении</string>
+    <string name="title_group_other">Другое</string>
+    <string name="title_voice_assistant">Голосовой помощник</string>
+    <string name="chat_new">Новый чат</string>
+    <string name="chat_delete">Удалить</string>
+    <string name="chat_close">Закрыть</string>
+    <string name="chat_regenerate_response">Сгенерировать заново</string>
+    <string name="chat_speak">Говорить</string>
+    <string name="chat_toast_new_conversation">Начат новый чат</string>
+    <string name="chat_toast_delete_conversation">Чат удален!</string>
+    <string name="chat_toast_delete_conversation_not_found">Нет чата для удаления</string>
+    <string name="chat_toast_copy_clipboard">Скопировано в буфер обмена</string>
+    <string name="chat_input_box_hint">Ввести запрос</string>
+    <string name="user_cancelled_response">Ответ отменен пользователем.</string>
+    <string name="network_error_response">Ошибка сети. Пожалуйста, попробуйте позже.</string>
+    <string name="unexpected_error_response">Неожиданная ошибка. Пожалуйста, попробуйте позже.</string>
+    <string name="file_empty">Файл (%s) пуст</string>
+    <string name="file_exceeds_size_limit">Файл (%s) превышает лимит размера %s</string>
+    <string name="file_not_supported">Файл (%s) не поддерживается</string>
+    <string name="chat_history_search">Поиск</string>
+    <string name="search_chat">Поиск в чате</string>
+    <string name="fragment_chats_no_chats_message">Ваши чаты появятся здесь</string>
+    <string name="settings_ai">ИИ</string>
+    <string name="settings_ai_style_title">Стиль общения</string>
+    <string name="settings_ai_web_search_title">Поиск в интернете</string>
+    <string name="settings_ai_web_search_summary">Разрешить ИИ выполнять поиск в интернете</string>
+    <string name="pref_custom_instructions_title">Пользовательские инструкции</string>
+    <string name="pref_custom_instructions_summary">Изменить поведение ИИ</string>
+    <string name="pref_custom_instructions_input_hint">Введите свои инструкции здесь</string>
+    <string name="about_app_developed_by">Разработано <a href="https://github.com/iamlooper">Looper</a></string>
+    <string name="about_app_more_info">Дополнительная информация: <a href="https://github.com/iamlooper/Lumi-AI">Нажмите сюда</a>\n(описание, благодарности и лицензии и т. д.)</string>
+    <string name="about_more_apps_on_ps">Больше приложений в Play Store: <a href="https://play.google.com/store/apps/dev?id=6115418187591502860">Нажмите сюда</a></string>
+    <string name="more_apps_on_play_store_title">Больше приложений в Play Store</string>
+    <string name="more_apps_on_play_store_summary">Попробуйте другие мои приложения в Play Store</string>
+    <string name="release_channel_title">Канал</string>
+    <string name="release_channel_summary">Следите за новыми обновлениями и проектами в нашем Telegram канале</string>
+    <string name="credits_title">Благодарности</string>
+    <string name="credits_summary">Люди, которым я очень благодарен за помощь в создании этого приложения</string>
+    <string name="licenses_title">Лицензия</string>
+    <string name="licenses_summary">Библиотеки, использованные для разработки этого приложения</string>
+    <string name="chat_copy_to_clipboard">Скопировать в буфер обмена</string>
+    <string name="user">Пользователь</string>
+    <string name="edit_chat_title">Изменить название чата</string>
+    <string name="edit">Изменить</string>
+    <string name="delete_all_chats">Удалить все чаты</string>
+    <string name="delete_chat">Удалить чат</string>
+    <string name="all_conversations_deleted">Все чаты удалены!</string>
+    <string name="select_text">Выбрать текст</string>
+</resources>
