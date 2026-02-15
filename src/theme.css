@@ -1,0 +1,201 @@
+/* --- Material Design 3 Expressive Theme for Lumi AI --- */
+/* Expressive = larger corners, vibrant palette, playful motion, generous spacing */
+
+:root {
+  /* --- Reference Typeface --- */
+  --md-ref-typeface-brand: "Google Sans", "Segoe UI", system-ui, sans-serif;
+  --md-ref-typeface-plain: "Google Sans Text", "Segoe UI", system-ui, sans-serif;
+
+  /* --- System Color (Light) — Material Theme Builder seed #6DB0FF --- */
+  --md-sys-color-primary: #39608F;
+  --md-sys-color-on-primary: #FFFFFF;
+  --md-sys-color-primary-container: #D3E4FF;
+  --md-sys-color-on-primary-container: #1D4875;
+  --md-sys-color-secondary: #545F70;
+  --md-sys-color-on-secondary: #FFFFFF;
+  --md-sys-color-secondary-container: #D7E3F8;
+  --md-sys-color-on-secondary-container: #3C4858;
+  --md-sys-color-tertiary: #6C5677;
+  --md-sys-color-on-tertiary: #FFFFFF;
+  --md-sys-color-tertiary-container: #F4D9FF;
+  --md-sys-color-on-tertiary-container: #533F5F;
+  --md-sys-color-error: #BA1A1A;
+  --md-sys-color-on-error: #FFFFFF;
+  --md-sys-color-error-container: #FFDAD6;
+  --md-sys-color-on-error-container: #93000A;
+  --md-sys-color-background: #F8F9FF;
+  --md-sys-color-on-background: #191C20;
+  --md-sys-color-surface: #F8F9FF;
+  --md-sys-color-on-surface: #191C20;
+  --md-sys-color-surface-variant: #DFE2EB;
+  --md-sys-color-on-surface-variant: #43474E;
+  --md-sys-color-surface-container: #ECEDF4;
+  --md-sys-color-surface-container-low: #F2F3FA;
+  --md-sys-color-surface-container-lowest: #FFFFFF;
+  --md-sys-color-surface-container-high: #E7E8EE;
+  --md-sys-color-surface-container-highest: #E1E2E8;
+  --md-sys-color-surface-bright: #F8F9FF;
+  --md-sys-color-surface-dim: #D8DAE0;
+  --md-sys-color-outline: #73777F;
+  --md-sys-color-outline-variant: #C3C6CF;
+  --md-sys-color-inverse-surface: #2E3035;
+  --md-sys-color-inverse-on-surface: #EFF0F7;
+  --md-sys-color-inverse-primary: #A2C9FE;
+  --md-sys-color-shadow: #000000;
+  --md-sys-color-scrim: #000000;
+  --md-sys-color-surface-tint: #39608F;
+
+  /* --- Shape (Expressive = larger radii) --- */
+  --md-sys-shape-corner-none: 0px;
+  --md-sys-shape-corner-extra-small: 8px;
+  --md-sys-shape-corner-small: 12px;
+  --md-sys-shape-corner-medium: 16px;
+  --md-sys-shape-corner-large: 24px;
+  --md-sys-shape-corner-extra-large: 32px;
+  --md-sys-shape-corner-full: 9999px;
+
+  /* --- Elevation shadow color --- */
+  --md-elevation-shadow-color: rgba(0, 0, 0, 0.15);
+}
+
+/* --- Dark Theme — Material Theme Builder seed #6DB0FF --- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --md-sys-color-primary: #A2C9FE;
+    --md-sys-color-on-primary: #00325B;
+    --md-sys-color-primary-container: #1D4875;
+    --md-sys-color-on-primary-container: #D3E4FF;
+    --md-sys-color-secondary: #BBC7DB;
+    --md-sys-color-on-secondary: #263141;
+    --md-sys-color-secondary-container: #3C4858;
+    --md-sys-color-on-secondary-container: #D7E3F8;
+    --md-sys-color-tertiary: #D8BDE3;
+    --md-sys-color-on-tertiary: #3C2947;
+    --md-sys-color-tertiary-container: #533F5F;
+    --md-sys-color-on-tertiary-container: #F4D9FF;
+    --md-sys-color-error: #FFB4AB;
+    --md-sys-color-on-error: #690005;
+    --md-sys-color-error-container: #93000A;
+    --md-sys-color-on-error-container: #FFDAD6;
+    --md-sys-color-background: #111418;
+    --md-sys-color-on-background: #E1E2E8;
+    --md-sys-color-surface: #111418;
+    --md-sys-color-on-surface: #E1E2E8;
+    --md-sys-color-surface-variant: #43474E;
+    --md-sys-color-on-surface-variant: #C3C6CF;
+    --md-sys-color-surface-container: #1D2024;
+    --md-sys-color-surface-container-low: #191C20;
+    --md-sys-color-surface-container-lowest: #0B0E13;
+    --md-sys-color-surface-container-high: #272A2F;
+    --md-sys-color-surface-container-highest: #32353A;
+    --md-sys-color-surface-bright: #37393E;
+    --md-sys-color-surface-dim: #111418;
+    --md-sys-color-outline: #8D9199;
+    --md-sys-color-outline-variant: #43474E;
+    --md-sys-color-inverse-surface: #E1E2E8;
+    --md-sys-color-inverse-on-surface: #2E3035;
+    --md-sys-color-inverse-primary: #39608F;
+    --md-sys-color-shadow: #000000;
+    --md-sys-color-scrim: #000000;
+    --md-sys-color-surface-tint: #A2C9FE;
+    --md-elevation-shadow-color: rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* --- Global Styles --- */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--md-ref-typeface-plain);
+  background: var(--md-sys-color-background);
+  color: var(--md-sys-color-on-background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  font-synthesis: none;
+  overscroll-behavior: none;
+}
+
+/* --- Native Desktop Feel --- */
+
+body, button, input, select, textarea {
+  font-family: var(--md-ref-typeface-plain);
+}
+
+body {
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+}
+
+.message-text,
+.thinking-content,
+.md-code-pre,
+input,
+textarea {
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+}
+
+a, button, [role="button"], md-icon-button, md-filled-button,
+md-filled-tonal-button, md-outlined-button, md-text-button,
+md-fab, md-list-item[type="button"] {
+  cursor: pointer;
+}
+
+img, a {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* --- Scrollbar Styling --- */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--md-sys-color-outline-variant);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--md-sys-color-outline);
+}
+
+/* --- Brand Logo Mask --- */
+.lumi-logo {
+  -webkit-mask-image: url('./assets/logo.svg');
+  mask-image: url('./assets/logo.svg');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+/* --- Expressive Animation Tokens --- */
+:root {
+  --motion-duration-short: 150ms;
+  --motion-duration-medium: 300ms;
+  --motion-duration-long: 500ms;
+  --motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+}

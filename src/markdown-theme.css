@@ -1,0 +1,541 @@
+/* --- Material Design 3 Expressive Markdown Prose Theme --- */
+
+.message-text {
+  font-size: 14.5px;
+  line-height: 1.75;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.message-text p {
+  margin: 0 0 12px;
+}
+
+.message-text p:last-child {
+  margin-bottom: 0;
+}
+
+.message-text h1,
+.message-text h2,
+.message-text h3,
+.message-text h4,
+.message-text h5,
+.message-text h6 {
+  margin: 20px 0 8px;
+  font-family: var(--md-ref-typeface-brand);
+  font-weight: 500;
+  line-height: 1.3;
+  color: inherit;
+}
+
+.message-text h1 { font-size: 1.5em; }
+.message-text h2 { font-size: 1.3em; }
+.message-text h3 { font-size: 1.15em; }
+.message-text h4 { font-size: 1.05em; }
+
+.message-text h1:first-child,
+.message-text h2:first-child,
+.message-text h3:first-child {
+  margin-top: 0;
+}
+
+/* --- Links --- */
+
+.md-link {
+  color: var(--md-sys-color-primary);
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: background var(--motion-duration-short) var(--motion-easing-emphasized);
+}
+
+.md-link:hover {
+  text-decoration: underline;
+  background: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
+}
+
+.bubble-user .md-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  opacity: 0.85;
+}
+
+.bubble-user .md-link:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--md-sys-color-on-primary-container) 12%, transparent);
+}
+
+/* --- Inline Code --- */
+
+.md-inline-code {
+  background: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-primary);
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 0.88em;
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", "SF Mono", "Consolas", monospace;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.bubble-user .md-inline-code {
+  background: color-mix(in srgb, var(--md-sys-color-on-primary-container) 15%, transparent);
+  color: inherit;
+}
+
+/* --- Code Block --- */
+
+.md-code-block {
+  margin: 12px 0;
+  border-radius: var(--md-sys-shape-corner-medium);
+  overflow: hidden;
+  background: var(--md-sys-color-surface-container-highest);
+  border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.md-code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: var(--md-sys-color-surface-container-high);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.md-code-lang {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--md-sys-color-on-surface-variant);
+  font-family: var(--md-ref-typeface-plain);
+}
+
+.md-code-copy {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--md-sys-color-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: var(--md-sys-shape-corner-small);
+  font-family: var(--md-ref-typeface-plain);
+  transition: background var(--motion-duration-short) var(--motion-easing-emphasized);
+}
+
+.md-code-copy:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);
+}
+
+.md-code-pre {
+  margin: 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.65;
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", "SF Mono", "Consolas", monospace;
+}
+
+.md-code-pre code {
+  font-family: inherit;
+  background: none;
+  padding: 0;
+}
+
+/* --- Blockquotes --- */
+
+.md-blockquote {
+  margin: 12px 0;
+  padding: 10px 16px;
+  border-left: 4px solid var(--md-sys-color-primary);
+  background: color-mix(in srgb, var(--md-sys-color-primary-container) 40%, transparent);
+  border-radius: 0 var(--md-sys-shape-corner-small) var(--md-sys-shape-corner-small) 0;
+  color: var(--md-sys-color-on-surface);
+}
+
+.md-blockquote p {
+  margin: 0;
+}
+
+.bubble-user .md-blockquote {
+  border-left-color: var(--md-sys-color-on-primary-container);
+  background: color-mix(in srgb, var(--md-sys-color-on-primary-container) 10%, transparent);
+  color: inherit;
+}
+
+/* --- Lists --- */
+
+.message-text ul,
+.message-text ol {
+  margin: 8px 0;
+  padding-left: 24px;
+}
+
+.message-text li {
+  margin-bottom: 4px;
+  line-height: 1.65;
+}
+
+.message-text li::marker {
+  color: var(--md-sys-color-primary);
+}
+
+.bubble-user .message-text li::marker {
+  color: inherit;
+}
+
+.message-text ul ul,
+.message-text ol ol,
+.message-text ul ol,
+.message-text ol ul {
+  margin: 4px 0;
+}
+
+/* --- Tables --- */
+
+.md-table-wrap {
+  overflow-x: auto;
+  margin: 12px 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.md-table-wrap .md-table {
+  margin: 0;
+}
+
+.md-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 12px 0;
+  font-size: 13.5px;
+  border-radius: var(--md-sys-shape-corner-small);
+  overflow: hidden;
+  border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.md-table th {
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--md-sys-color-outline-variant);
+  font-family: var(--md-ref-typeface-plain);
+}
+
+.md-table td {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface);
+}
+
+.md-table tr:last-child td {
+  border-bottom: none;
+}
+
+.md-table tr:hover td {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 4%, transparent);
+}
+
+/* --- Horizontal Rule --- */
+
+.message-text hr {
+  border: none;
+  height: 1px;
+  background: var(--md-sys-color-outline-variant);
+  margin: 20px 0;
+}
+
+/* --- Images --- */
+
+.message-text img {
+  max-width: 100%;
+  border-radius: var(--md-sys-shape-corner-medium);
+  margin: 8px 0;
+}
+
+/* --- Strong & Emphasis --- */
+
+.message-text strong {
+  font-weight: 600;
+}
+
+.message-text em {
+  font-style: italic;
+}
+
+/* --- Strikethrough --- */
+
+.message-text s,
+.message-text del {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* --- Task Lists --- */
+
+.md-task-item {
+  list-style: none;
+  margin-left: -24px;
+  padding-left: 0;
+}
+
+.md-task-checkbox {
+  margin-right: 8px;
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  accent-color: var(--md-sys-color-primary);
+  pointer-events: none;
+}
+
+.bubble-user .md-task-checkbox {
+  accent-color: var(--md-sys-color-on-primary-container);
+}
+
+/* --- Mark / Highlight --- */
+
+.message-text mark {
+  background: color-mix(in srgb, var(--md-sys-color-tertiary-container) 60%, transparent);
+  color: var(--md-sys-color-on-tertiary-container);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+.bubble-user .message-text mark {
+  background: color-mix(in srgb, var(--md-sys-color-on-primary-container) 18%, transparent);
+  color: inherit;
+}
+
+/* --- Subscript & Superscript --- */
+
+.message-text sub {
+  font-size: 0.75em;
+  vertical-align: sub;
+}
+
+.message-text sup {
+  font-size: 0.75em;
+  vertical-align: super;
+}
+
+/* --- Math (KaTeX) --- */
+
+.message-text .katex {
+  font-size: 1em;
+}
+
+.md-math-block {
+  margin: 12px 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+  background: var(--md-sys-color-surface-container);
+  border-radius: var(--md-sys-shape-corner-medium);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  text-align: center;
+}
+
+.md-math-error {
+  color: var(--md-sys-color-error);
+  font-size: 0.88em;
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", "SF Mono", "Consolas", monospace;
+}
+
+.bubble-user .md-math-block {
+  background: color-mix(in srgb, var(--md-sys-color-on-primary-container) 10%, transparent);
+  border-color: color-mix(in srgb, var(--md-sys-color-on-primary-container) 20%, transparent);
+}
+
+/* --- Highlight.js — MD3 Expressive Syntax Theme --- */
+
+/* --- Light Mode Syntax Colors (palette: primary #39608F, tertiary #6C5677) --- */
+
+.hljs {
+  color: #191C20;
+  background: transparent;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #73777F;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-type {
+  color: #6C5677;
+  font-weight: 500;
+}
+
+.hljs-literal,
+.hljs-number,
+.hljs-symbol,
+.hljs-bullet {
+  color: #B5541A;
+}
+
+.hljs-string,
+.hljs-doctag,
+.hljs-regexp {
+  color: #1A6B3C;
+}
+
+.hljs-title,
+.hljs-title.function_,
+.hljs-title.class_,
+.hljs-section {
+  color: #39608F;
+  font-weight: 500;
+}
+
+.hljs-built_in,
+.hljs-builtin-name {
+  color: #1D4875;
+}
+
+.hljs-attr,
+.hljs-attribute {
+  color: #545F70;
+}
+
+.hljs-variable,
+.hljs-template-variable {
+  color: #BA1A1A;
+}
+
+.hljs-params {
+  color: #43474E;
+}
+
+.hljs-meta,
+.hljs-meta .hljs-keyword {
+  color: #39608F;
+  font-weight: 500;
+}
+
+.hljs-tag {
+  color: #43474E;
+}
+
+.hljs-name,
+.hljs-tag .hljs-attr {
+  color: #6C5677;
+}
+
+.hljs-tag .hljs-string {
+  color: #1A6B3C;
+}
+
+.hljs-deletion {
+  color: #BA1A1A;
+  background: #FFDAD6;
+}
+
+.hljs-addition {
+  color: #1A6B3C;
+  background: #D4F5DC;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: 700;
+}
+
+/* --- Dark Mode Syntax Colors (palette: primary #A2C9FE, tertiary #D8BDE3) --- */
+
+@media (prefers-color-scheme: dark) {
+  .hljs {
+    color: #E1E2E8;
+    background: transparent;
+  }
+
+  .hljs-comment,
+  .hljs-quote {
+    color: #8D9199;
+    font-style: italic;
+  }
+
+  .hljs-keyword,
+  .hljs-selector-tag,
+  .hljs-type {
+    color: #D8BDE3;
+    font-weight: 500;
+  }
+
+  .hljs-literal,
+  .hljs-number,
+  .hljs-symbol,
+  .hljs-bullet {
+    color: #FFB68C;
+  }
+
+  .hljs-string,
+  .hljs-doctag,
+  .hljs-regexp {
+    color: #7BDBA0;
+  }
+
+  .hljs-title,
+  .hljs-title.function_,
+  .hljs-title.class_,
+  .hljs-section {
+    color: #A2C9FE;
+    font-weight: 500;
+  }
+
+  .hljs-built_in,
+  .hljs-builtin-name {
+    color: #D3E4FF;
+  }
+
+  .hljs-attr,
+  .hljs-attribute {
+    color: #BBC7DB;
+  }
+
+  .hljs-variable,
+  .hljs-template-variable {
+    color: #FFB4AB;
+  }
+
+  .hljs-params {
+    color: #C3C6CF;
+  }
+
+  .hljs-meta,
+  .hljs-meta .hljs-keyword {
+    color: #A2C9FE;
+    font-weight: 500;
+  }
+
+  .hljs-tag {
+    color: #C3C6CF;
+  }
+
+  .hljs-name,
+  .hljs-tag .hljs-attr {
+    color: #D8BDE3;
+  }
+
+  .hljs-tag .hljs-string {
+    color: #7BDBA0;
+  }
+
+  .hljs-deletion {
+    color: #FFB4AB;
+    background: rgba(147, 0, 10, 0.3);
+  }
+
+  .hljs-addition {
+    color: #7BDBA0;
+    background: rgba(26, 107, 60, 0.2);
+  }
+}

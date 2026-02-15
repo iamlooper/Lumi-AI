@@ -1,0 +1,54 @@
+name: Build Windows
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            src-tauri/target/
+          key: ${{ runner.os }}-cargo-windows-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-windows-
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install frontend dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Clean stale bundle artifacts
+        shell: bash
+        run: rm -rf src-tauri/target/release/bundle/
+
+      - name: Build Windows app
+        run: bun run tauri build
+
+      - name: Rename Windows artifacts
+        shell: bash
+        run: |
+          mkdir -p windows-release
+          cp src-tauri/target/release/bundle/nsis/*.exe windows-release/lumi-ai-windows-x64-setup.exe
+          cp src-tauri/target/release/bundle/msi/*.msi windows-release/lumi-ai-windows-x64.msi
+          ls -lh windows-release/
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: lumi-ai-windows
+          path: windows-release/*

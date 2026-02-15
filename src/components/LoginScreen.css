@@ -1,0 +1,190 @@
+.login-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  background: var(--md-sys-color-background);
+  padding: 24px;
+}
+
+.login-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 40px;
+  border-radius: var(--md-sys-shape-corner-extra-large);
+  background: var(--md-sys-color-surface);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+.login-logo {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-primary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.login-icon {
+  width: 40px;
+  height: 40px;
+  background-color: var(--md-sys-color-on-primary-container);
+}
+
+.login-title {
+  color: var(--md-sys-color-on-surface);
+  margin: 0;
+}
+
+.login-subtitle {
+  color: var(--md-sys-color-on-surface-variant);
+  margin: 0 0 8px;
+}
+
+.login-error {
+  color: var(--md-sys-color-error);
+  background: var(--md-sys-color-error-container);
+  padding: 12px 16px;
+  border-radius: var(--md-sys-shape-corner-small);
+  width: 100%;
+}
+
+.login-button {
+  width: 100%;
+  --md-filled-button-container-height: 48px;
+  --md-filled-button-container-shape: var(--md-sys-shape-corner-full);
+}
+
+.login-disclaimer {
+  color: var(--md-sys-color-on-surface-variant);
+  margin: 0;
+  opacity: 0.7;
+}
+
+.login-link {
+  color: var(--md-sys-color-primary);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.login-link:hover {
+  text-decoration: underline;
+}
+
+/* --- Native Dialog (MD3-style) --- */
+
+.disclaimer-dialog {
+  border: none;
+  outline: none;
+  border-radius: 28px;
+  background: var(--md-sys-color-surface-container-high, var(--md-sys-color-surface));
+  color: var(--md-sys-color-on-surface);
+  padding: 0;
+  margin: auto;
+  width: min(480px, calc(100vw - 48px));
+  min-width: 280px;
+  max-height: min(560px, calc(100vh - 48px));
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.3),
+    0 4px 8px 3px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.disclaimer-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.32);
+}
+
+.disclaimer-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.disclaimer-dialog-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.disclaimer-dialog-headline {
+  margin: 0;
+  padding: 24px 24px 16px;
+  color: var(--md-sys-color-on-surface);
+  flex-shrink: 0;
+}
+
+.disclaimer-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.disclaimer-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 24px 24px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.disclaimer-btn {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--md-sys-color-primary);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  line-height: 40px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background var(--motion-duration-short) var(--motion-easing-standard);
+}
+
+.disclaimer-btn:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
+}
+
+.disclaimer-btn:active {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);
+}
+
+.disclaimer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.disclaimer-heading {
+  margin: 0;
+  color: var(--md-sys-color-on-surface);
+}
+
+.disclaimer-section p {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  line-height: 1.6;
+}
+
+/* --- Responsive --- */
+
+@media (max-width: 599px) {
+  .login-screen { padding: 16px; }
+  .login-card { padding: 32px 24px; }
+  .login-logo { width: 64px; height: 64px; }
+  .login-icon { --md-icon-size: 32px; }
+}

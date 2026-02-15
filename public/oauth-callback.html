@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumi AI — Authentication</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #F8F9FF;
+      color: #191C20;
+      -webkit-font-smoothing: antialiased;
+    }
+    .card {
+      text-align: center;
+      padding: 48px 40px;
+      border-radius: 32px;
+      background: #FFFFFF;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+      max-width: 380px;
+      width: calc(100% - 48px);
+      animation: card-in 400ms cubic-bezier(0.05,0.7,0.1,1);
+    }
+    @keyframes card-in {
+      from { opacity: 0; transform: scale(0.94) translateY(8px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .icon { margin-bottom: 16px; }
+    .icon svg { width: 48px; height: 48px; }
+    .icon-success svg { fill: #39608F; }
+    .icon-error svg { fill: #BA1A1A; }
+    h2 { font-size: 22px; font-weight: 500; margin-bottom: 8px; }
+    p { font-size: 14px; color: #43474E; line-height: 1.5; }
+    .closing { margin-top: 24px; font-size: 12px; color: #73777F; }
+
+    @media (prefers-color-scheme: dark) {
+      body { background: #111418; color: #E1E2E8; }
+      .card { background: #1D2024; box-shadow: 0 2px 16px rgba(0,0,0,0.3); }
+      .icon-success svg { fill: #A2C9FE; }
+      .icon-error svg { fill: #FFB4AB; }
+      p { color: #C3C6CF; }
+      .closing { color: #8D9199; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon icon-success" id="icon">
+      <svg id="icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm-56-328L300-532l-56 56 180 180 344-344-56-56-288 288Z"/></svg>
+    </div>
+    <h2 id="title">Authentication successful</h2>
+    <p id="message">You can close this tab and return to Lumi AI.</p>
+    <p class="closing">This window will close automatically&hellip;</p>
+  </div>
+  <script>
+    (function () {
+      var url = window.location.href;
+      var params = new URLSearchParams(window.location.search);
+      var error = params.get("error");
+
+      if (error) {
+        document.getElementById("icon").className = "icon icon-error";
+        document.getElementById("icon-svg").innerHTML = '<path d="M480-280q17 0 28.5-11.5T520-320q0-17-11.5-28.5T480-360q-17 0-28.5 11.5T440-320q0 17 11.5 28.5T480-280Zm-40-160h80v-240h-80v240Zm40 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z"/>';
+        document.getElementById("title").textContent = "Authentication failed";
+        document.getElementById("message").textContent = error;
+      }
+
+      if (window.opener) {
+        window.opener.postMessage(
+          { type: "oauth-callback", url: url, error: error || null },
+          window.location.origin
+        );
+      }
+
+      setTimeout(function () { window.close(); }, 2000);
+    })();
+  </script>
+</body>
+</html>

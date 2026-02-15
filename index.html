@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1a73e8" />
+    <link rel="icon" type="image/svg+xml" href="/src/assets/logo.svg" />
+    <title>Lumi AI</title>
+
+    <!-- Local fonts (bundled, no external requests) -->
+    <style>
+      @font-face {
+        font-family: 'Google Sans';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('/fonts/GoogleSans-Regular.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Google Sans';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url('/fonts/GoogleSans-Medium.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Google Sans';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url('/fonts/GoogleSans-Bold.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Google Sans Text';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('/fonts/GoogleSansText-Regular.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Google Sans Text';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url('/fonts/GoogleSansText-Medium.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Google Sans Text';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url('/fonts/GoogleSansText-Bold.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Material Symbols Rounded';
+        font-style: normal;
+        font-weight: 400;
+        src: url('/fonts/MaterialSymbolsRounded.ttf') format('truetype');
+      }
+      :root {
+        --md-icon-font: 'Material Symbols Rounded';
+      }
+      md-icon {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      md-icon[filled] {
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+
+    <script src="/src/index.tsx" type="module"></script>
+  </body>
+</html>
